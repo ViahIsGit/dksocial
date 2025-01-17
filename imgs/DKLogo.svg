@@ -1,0 +1,13 @@
+<svg width="180" height="180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+  <!-- Fundo circular -->
+  <circle cx="75" cy="75" r="70" fill="#0073e6" />
+
+  <!-- Letra "D" -->
+  <rect x="35" y="45" width="20" height="60" fill="#ffffff" />
+  <rect x="55" y="45" width="15" height="20" fill="#ffffff" />
+  <rect x="55" y="85" width="15" height="20" fill="#ffffff" />
+
+  <!-- Letra "K" -->
+  <rect x="90" y="45" width="20" height="60" fill="#ffffff" />
+  <polygon points="110,45 125,45 110,75 125,105 110,105 95,75" fill="#ffffff" />
+</svg>
