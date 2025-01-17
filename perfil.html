@@ -87,7 +87,14 @@
     onAuthStateChanged(auth, (user) => {
         if (user) {
             // Usuário autenticado, carregar perfil e posts
-            loadProfile(user.uid);
+            const usernameFromUrl = getUsernameFromUrl();
+            if (usernameFromUrl) {
+                // Se houver um username na URL, carregar o perfil correspondente
+                loadProfileByUsername(usernameFromUrl);
+            } else {
+                // Se não houver username na URL, carregar o perfil do usuário logado
+                loadProfile(user.uid);
+            }
             loadPosts(user.uid);
         } else {
             // Usuário não autenticado, redirecionar para a página de login
@@ -109,16 +116,16 @@
                     document.getElementById('profile-picture').src = userData.profilePicture;
                 }
 
-                   // Gera o link personalizado com o username
-            const profileLink = `https://dksocialbr.vercel.app/perfil.html/@${userData.username}`;
-            document.getElementById('profile-link').innerHTML = `<a href="${profileLink}" target="_blank">${profileLink}</a>`;
-        } else {
-            console.error('Dados do usuário não encontrados.');
-        }
-    }, (error) => {
-        console.error('Erro ao carregar perfil:', error);
-    });
-}
+                // Gera o link personalizado com o username
+                const profileLink = `https://dksocialbr.vercel.app/perfil.html/@${userData.username}`;
+                document.getElementById('profile-link').innerHTML = `<a href="${profileLink}" target="_blank">${profileLink}</a>`;
+            } else {
+                console.error('Dados do usuário não encontrados.');
+            }
+        }, (error) => {
+            console.error('Erro ao carregar perfil:', error);
+        });
+    }
 
     // Função para carregar os posts do usuário (Firestore)
     async function loadPosts(uid) {
@@ -152,11 +159,12 @@
         }
     }
 
+    // Função para carregar o perfil de um usuário pelo username (Firestore)
     async function loadProfileByUsername(username) {
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('username', '==', username));
         const querySnapshot = await getDocs(q);
-    
+
         if (!querySnapshot.empty) {
             querySnapshot.forEach((doc) => {
                 const userData = doc.data();
@@ -169,9 +177,11 @@
             });
         } else {
             console.error('Usuário não encontrado.');
+            document.getElementById('profile-username').textContent = 'Usuário não encontrado.';
         }
     }
 
+    // Função para extrair o username da URL
     function getUsernameFromUrl() {
         const path = window.location.href; // Pega a URL completa
         const url = new URL(path); // Cria um objeto URL
