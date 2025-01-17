@@ -8,9 +8,163 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-  <style>
+<style>
     /* Estilos existentes */
-    /* ... (seus estilos CSS aqui) ... */
+    @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;600;800&display=swap");
+    :root {
+      --background-color: rgb(255, 255, 255);
+      --h1-input-color: rgb(0, 0, 0);
+      --label-color: rgb(0, 0, 0);
+      --username-password-color: rgb(0, 0, 0);
+      --username-password-background-color: rgb(245, 248, 250);
+      --username-password-border-color: rgb(101, 119, 134);
+      --username-password-focus-color: rgb(29, 161, 242);
+      --username-password-focus-border-color: rgb(29, 161, 242);
+      --entrar-background-color: rgb(151, 208, 248);
+      --entrar-color: rgb(255, 255, 255);
+      --entrar-hover-background-color: rgb(29, 161, 242);
+      --entrar-hover-color: rgb(255, 255, 255);
+      --signup-a-color: rgb(80, 174, 231);
+      --dot-color: rgb(101, 119, 134);
+    }
+    .darkMode {
+      --background-color: rgb(21, 32, 43);
+      --h1-input-color: rgb(255, 255, 255);
+      --label-color: rgb(255, 255, 255);
+      --username-password-color: rgb(136, 153, 166);
+      --username-password-background-color: rgb(25, 39, 52);
+      --username-password-border-color: rgb(136, 153, 166);
+      --entrar-background-color: rgb(25, 96, 142);
+      --entrar-color: rgb(138, 143, 148);
+      --entrar-hover-background-color: rgb(26, 145, 218);
+      --entrar-hover-color: rgb(255, 255, 255);
+      --signup-a-color: rgb(27, 149, 224);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: "Google Sans", sans-serif;
+      box-sizing: border-box;
+      border: none;
+    }
+    body {
+      user-select: none;
+      height: 100%;
+      background-color: var(--background-color);
+    }
+    div {
+      margin: 20px 0;
+    }
+    #login,
+    #signup,
+    #profile-setup {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    img {
+      width: 100px;
+    }
+    .logo {
+      display: flex;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 35px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--h1-input-color);
+    }
+    label {
+      padding-left: 7px;
+      opacity: 70%;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--label-color);
+    }
+    input {
+      outline: 0;
+      font-size: 19px;
+      color: var(--h1-input-color);
+    }
+    .username,
+    .password,
+    .profile-picture {
+      background-color: var(--username-password-background-color);
+      border-bottom: 2px solid var(--username-password-border-color);
+    }
+    .username:focus-within,
+    .password:focus-within,
+    .profile-picture:focus-within {
+      color: var(--username-password-focus-color);
+      border-color: var(--username-password-focus-border-color);
+    }
+    .username,
+    .password,
+    .profile-picture,
+    .entrar {
+      padding-top: 8px;
+    }
+    .input-box {
+      padding: 2px 10px 5px;
+      margin: 0;
+    }
+    #user,
+    #password,
+    #signup-email,
+    #signup-password,
+    #profile-username,
+    #profile-picture {
+      width: 100%;
+      background: none;
+    }
+    #entrar,
+    #signup-button,
+    #profile-setup-button {
+      background-color: var(--entrar-background-color);
+      color: var(--entrar-color);
+      font-weight: bold;
+      width: 100%;
+      padding: 15px 10px 15px 10px;
+      border-radius: 9999px;
+      font-size: 14px;
+    }
+    #entrar:hover,
+    #signup-button:hover,
+    #profile-setup-button:hover {
+      background-color: var(--entrar-hover-background-color);
+      color: var(--entrar-hover-color);
+      cursor: pointer;
+    }
+    .signup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    .signup a {
+      color: var(--signup-a-color);
+      font-weight: 400;
+      margin: 0 5px;
+      text-align: center;
+      text-decoration: none;
+    }
+    .signup a:hover {
+      text-decoration: underline;
+    }
+    span.dot {
+      padding-bottom: 5px;
+      color: var(--dot-color);
+      font-weight: 400;
+    }
   </style>
 </head>
 
