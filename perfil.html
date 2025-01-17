@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil / DK</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;600;800&display=swap");
+
+        body {
+            font-family: 'Google Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        #profile-header {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        #profile-username {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+
+        #posts-container {
+            padding: 20px;
+        }
+
+        .post {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+<div id="profile-header">
+    <img id="profile-picture" src="" alt="Foto de Perfil">
+    <h1 id="profile-username"></h1>
+    <p id="profile-link"></p> <!-- Novo campo para o link do perfil -->
+</div>
+
+<div id="posts-container">
+    <!-- Posts serão inseridos aqui dinamicamente -->
+</div>
+
+<script type="module">
+    // Importe os módulos necessários do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Configuração do Firebase (substitua com suas credenciais)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAX52Zf503k8hH-3KTbnRhoVp7ZZFsAvVc",
+        authDomain: "dksocial-2ca10.firebaseapp.com",
+        databaseURL: "https://dksocial-2ca10-default-rtdb.firebaseio.com",
+        projectId: "dksocial-2ca10",
+        storageBucket: "dksocial-2ca10.appspot.com",
+        messagingSenderId: "227561021292",
+        appId: "1:227561021292:web:91b3a5c37fc6b9e6ae9d49",
+        measurementId: "G-LZ7B5D54S1"
+    };
+
+    // Inicialize o Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app); // Realtime Database
+    const db = getFirestore(app); // Firestore
+
+    // Verifique se o usuário está autenticado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuário autenticado, carregar perfil e posts
+            loadProfile(user.uid);
+            loadPosts(user.uid);
+        } else {
+            // Usuário não autenticado, redirecionar para a página de login
+            window.location.href = 'index.html';
+        }
+    });
+
+    // Função para carregar o perfil do usuário (Realtime Database)
+    function loadProfile(uid) {
+        const userRef = ref(database, 'users/' + uid); // Referência ao nó do usuário no Realtime Database
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val(); // Obtém os dados do usuário
+            if (userData) {
+                // Atualiza o nome de usuário na página
+                document.getElementById('profile-username').textContent = userData.username;
+
+                // Atualiza a foto de perfil, se existir
+                if (userData.profilePicture) {
+                    document.getElementById('profile-picture').src = userData.profilePicture;
+                }
+
+                   // Gera o link personalizado com o username
+            const profileLink = `https://dksocialbr.vercel.app/perfil.html/@${userData.username}`;
+            document.getElementById('profile-link').innerHTML = `<a href="${profileLink}" target="_blank">${profileLink}</a>`;
+        } else {
+            console.error('Dados do usuário não encontrados.');
+        }
+    }, (error) => {
+        console.error('Erro ao carregar perfil:', error);
+    });
+}
+
+    // Função para carregar os posts do usuário (Firestore)
+    async function loadPosts(uid) {
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = ''; // Limpar posts anteriores
+
+        try {
+            // Consulta para buscar os posts do usuário
+            const postsQuery = query(collection(db, 'tweets'), where('userId', '==', uid));
+            const querySnapshot = await getDocs(postsQuery);
+
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const postElement = document.createElement('div');
+                    postElement.className = 'post';
+                    postElement.innerHTML = `
+                        <img src="${post.profilePicture}" alt="Foto de Perfil" style="width: 50px; height: 50px; border-radius: 50%;">
+                        <p><strong>${post.username}</strong></p>
+                        <p>${post.text}</p>
+                        <small>Postado em: ${post.createdAt.toDate().toLocaleString()}</small>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            } else {
+                postsContainer.innerHTML = '<p>Nenhum post encontrado.</p>';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar posts:', error);
+            postsContainer.innerHTML = '<p>Erro ao carregar posts. Tente novamente mais tarde.</p>';
+        }
+    }
+
+    async function loadProfileByUsername(username) {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', username));
+        const querySnapshot = await getDocs(q);
+    
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                console.log('Dados do usuário encontrados:', userData); // Log para depuração
+                document.getElementById('profile-username').textContent = userData.username;
+                if (userData.profilePicture) {
+                    document.getElementById('profile-picture').src = userData.profilePicture;
+                }
+                // Carregar posts ou outras informações do usuário
+            });
+        } else {
+            console.error('Usuário não encontrado.');
+        }
+    }
+
+    function getUsernameFromUrl() {
+        const path = window.location.href; // Pega a URL completa
+        const url = new URL(path); // Cria um objeto URL
+        const pathname = url.pathname; // Pega o caminho da URL (ex: "/perfil.html/@username")
+        const parts = pathname.split('/'); // Divide o caminho em partes
+        const usernamePart = parts.find(part => part.startsWith('@')); // Encontra a parte que começa com "@"
+        if (usernamePart) {
+            return usernamePart.slice(1); // Remove o "@" e retorna o username
+        }
+        return null; // Retorna null se não encontrar o username
+    }
+</script>
+</body>
+</html>
