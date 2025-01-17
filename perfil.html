@@ -83,26 +83,42 @@
     const database = getDatabase(app); // Realtime Database
     const db = getFirestore(app); // Firestore
 
-    // Verifique se o usuário está autenticado
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // Usuário autenticado, carregar perfil e posts
-            const usernameFromUrl = getUsernameFromUrl();
-            if (usernameFromUrl) {
-                // Se houver um username na URL, carregar o perfil correspondente
-                loadProfileByUsername(usernameFromUrl);
-            } else {
-                // Se não houver username na URL, carregar o perfil do usuário logado
-                loadProfile(user.uid);
-            }
-            loadPosts(user.uid);
-        } else {
-            // Usuário não autenticado, redirecionar para a página de login
-            window.location.href = 'index.html';
+    // Função para extrair o username da URL
+    function getUsernameFromUrl() {
+        const path = window.location.href; // Pega a URL completa
+        const url = new URL(path); // Cria um objeto URL
+        const pathname = url.pathname; // Pega o caminho da URL (ex: "/perfil.html/@username")
+        const parts = pathname.split('/'); // Divide o caminho em partes
+        const usernamePart = parts.find(part => part.startsWith('@')); // Encontra a parte que começa com "@"
+        if (usernamePart) {
+            return usernamePart.slice(1); // Remove o "@" e retorna o username
         }
-    });
+        return null; // Retorna null se não encontrar o username
+    }
 
-    // Função para carregar o perfil do usuário (Realtime Database)
+    // Função para carregar o perfil do usuário pelo username (Firestore)
+    async function loadProfileByUsername(username) {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', username)); // Consulta pelo username
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                console.log('Dados do usuário encontrados:', userData); // Log para depuração
+                document.getElementById('profile-username').textContent = userData.username;
+                if (userData.profilePicture) {
+                    document.getElementById('profile-picture').src = userData.profilePicture;
+                }
+                // Carregar posts ou outras informações do usuário
+            });
+        } else {
+            console.error('Usuário não encontrado.');
+            document.getElementById('profile-username').textContent = 'Usuário não encontrado.';
+        }
+    }
+
+    // Função para carregar o perfil do usuário logado (Realtime Database)
     function loadProfile(uid) {
         const userRef = ref(database, 'users/' + uid); // Referência ao nó do usuário no Realtime Database
         onValue(userRef, (snapshot) => {
@@ -127,72 +143,23 @@
         });
     }
 
-    // Função para carregar os posts do usuário (Firestore)
-    async function loadPosts(uid) {
-        const postsContainer = document.getElementById('posts-container');
-        postsContainer.innerHTML = ''; // Limpar posts anteriores
-
-        try {
-            // Consulta para buscar os posts do usuário
-            const postsQuery = query(collection(db, 'tweets'), where('userId', '==', uid));
-            const querySnapshot = await getDocs(postsQuery);
-
-            if (!querySnapshot.empty) {
-                querySnapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const postElement = document.createElement('div');
-                    postElement.className = 'post';
-                    postElement.innerHTML = `
-                        <img src="${post.profilePicture}" alt="Foto de Perfil" style="width: 50px; height: 50px; border-radius: 50%;">
-                        <p><strong>${post.username}</strong></p>
-                        <p>${post.text}</p>
-                        <small>Postado em: ${post.createdAt.toDate().toLocaleString()}</small>
-                    `;
-                    postsContainer.appendChild(postElement);
-                });
+    // Verifique se o usuário está autenticado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuário autenticado
+            const usernameFromUrl = getUsernameFromUrl();
+            if (usernameFromUrl) {
+                // Se houver um username na URL, carregar o perfil correspondente
+                loadProfileByUsername(usernameFromUrl);
             } else {
-                postsContainer.innerHTML = '<p>Nenhum post encontrado.</p>';
+                // Se não houver username na URL, carregar o perfil do usuário logado
+                loadProfile(user.uid);
             }
-        } catch (error) {
-            console.error('Erro ao carregar posts:', error);
-            postsContainer.innerHTML = '<p>Erro ao carregar posts. Tente novamente mais tarde.</p>';
-        }
-    }
-
-    // Função para carregar o perfil de um usuário pelo username (Firestore)
-    async function loadProfileByUsername(username) {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', username));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
-                console.log('Dados do usuário encontrados:', userData); // Log para depuração
-                document.getElementById('profile-username').textContent = userData.username;
-                if (userData.profilePicture) {
-                    document.getElementById('profile-picture').src = userData.profilePicture;
-                }
-                // Carregar posts ou outras informações do usuário
-            });
         } else {
-            console.error('Usuário não encontrado.');
-            document.getElementById('profile-username').textContent = 'Usuário não encontrado.';
+            // Usuário não autenticado, redirecionar para a página de login
+            window.location.href = 'index.html';
         }
-    }
-
-    // Função para extrair o username da URL
-    function getUsernameFromUrl() {
-        const path = window.location.href; // Pega a URL completa
-        const url = new URL(path); // Cria um objeto URL
-        const pathname = url.pathname; // Pega o caminho da URL (ex: "/perfil.html/@username")
-        const parts = pathname.split('/'); // Divide o caminho em partes
-        const usernamePart = parts.find(part => part.startsWith('@')); // Encontra a parte que começa com "@"
-        if (usernamePart) {
-            return usernamePart.slice(1); // Remove o "@" e retorna o username
-        }
-        return null; // Retorna null se não encontrar o username
-    }
+    });
 </script>
 </body>
 </html>
