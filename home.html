@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home / DK</title>
+  <style>
+ /* Estilo geral */
+ @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;600;800&display=swap");
+
+
+body {
+    font-family: 'Google Sans', sans-serif;
+    margin: 0;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+  }
+  
+  a:hover,
+  a:focus {
+    color: #1da1f2;
+  }
+  
+  /* Cabeçalho */
+  .site-title {
+    margin: 0;
+    padding: 0px;
+    font-size: 2rem;
+    font-weight: 300;
+    background-color: #1da1f2;
+    color: #fff;
+    text-align: center;
+  }
+  
+  /* Barra de navegação */
+  .navbar {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+  }
+  
+  .navlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .navitem {
+    display: inline-block;
+  }
+  
+  .navlink a {
+    padding: 8px 12px;
+    display: inline-block;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .navlink.active {
+    border-bottom: 2px solid #1da1f2;
+  }
+  
+  .navbar-search {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+  
+  #navbar-search-input {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  #navbar-search-input:focus {
+    border-color: #1da1f2;
+  }
+  
+  #navbar-search-button {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+  }
+  
+  #navbar-search-button:hover {
+    color: #1da1f2;
+  }
+  
+  /* Container de posts */
+  .twit-container {
+    margin: 40px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .twit {
+    background-color: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .twit:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .twit-icon {
+    font-size: 24px;
+    color: #1da1f2;
+  }
+  
+  .twit-content {
+    margin-left: 10px;
+  }
+  
+  .twit-content p {
+    margin: 0;
+    color: #555;
+  }
+  
+  .twit-content .twit-author {
+    margin-top: 10px;
+    text-align: right;
+    font-weight: bold;
+    color: #1da1f2;
+  }
+  
+  /* Botão de criar post */
+  #create-twit-button {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    height: 60px;
+    width: 60px;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    background-color: #1da1f2;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+  }
+  
+  #create-twit-button:hover {
+    transform: scale(1.1);
+    background-color: #1991db;
+  }
+  
+  /* Modal */
+  #modal-backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+  }
+  
+  #create-twit-modal {
+    position: fixed;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1010;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+  }
+  
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e1e8ed;
+  }
+  
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .modal-close-button {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s ease;
+  }
+  
+  .modal-close-button:hover {
+    color: #1da1f2;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .twit-input-element {
+    margin-bottom: 20px;
+  }
+  
+  .twit-input-element label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .twit-input-element input,
+  .twit-input-element textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .twit-input-element input:focus,
+  .twit-input-element textarea:focus {
+    border-color: #1da1f2;
+  }
+  
+  .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e1e8ed;
+    text-align: right;
+  }
+  
+  .modal-footer button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modal-footer .modal-cancel-button {
+    background-color: #eee;
+    color: #333;
+  }
+  
+  .modal-footer .modal-cancel-button:hover {
+    background-color: #ddd;
+  }
+  
+  .modal-footer .modal-accept-button {
+    background-color: #1da1f2;
+    color: #fff;
+  }
+  
+  .modal-footer .modal-accept-button:hover {
+    background-color: #1991db;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .twit-container {
+      grid-template-columns: 1fr;
+    }
+  
+    .navbar-search {
+      display: none;
+    }
+  }
+
+    /* Estilo geral para os posts (tweets) */
+.tweet {
+    background-color: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .tweet:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Estilo para o nome de usuário */
+  .tweet .username {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1da1f2;
+    margin-bottom: 8px;
+  }
+  
+  /* Estilo para o texto do tweet */
+  .tweet .text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  
+  /* Estilo para a seção de ações (curtir e comentar) */
+  .tweet .actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  
+  /* Estilo para os botões de ação */
+  .tweet .actions button {
+    background: none;
+    border: none;
+    color: #657786;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.3s ease;
+  }
+  
+  .tweet .actions button:hover {
+    color: #1da1f2;
+  }
+  
+  /* Estilo para o ícone de curtir */
+  .tweet .actions .like-btn::before {
+    content: "❤️";
+  }
+  
+  /* Estilo para o ícone de comentar */
+  .tweet .actions .comment-btn::before {
+    content: "💬";
+  }
+  
+  /* Estilo para a seção de comentários */
+  .tweet .comments-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e1e8ed;
+  }
+  
+  /* Estilo para cada comentário */
+  .tweet .comments-section .comment {
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: #f5f8fa;
+    border-radius: 8px;
+  }
+  
+  /* Estilo para o autor do comentário */
+  .tweet .comments-section .comment .comment-author {
+    font-size: 12px;
+    font-weight: bold;
+    color: #1da1f2;
+    margin-bottom: 4px;
+  }
+  
+  /* Estilo para o texto do comentário */
+  .tweet .comments-section .comment .comment-text {
+    font-size: 12px;
+    color: #333;
+    line-height: 1.4;
+  }
+  
+  /* Responsividade para telas menores */
+  @media (max-width: 600px) {
+    .tweet {
+      padding: 12px;
+    }
+  
+    .tweet .username {
+      font-size: 14px;
+    }
+  
+    .tweet .text {
+      font-size: 12px;
+    }
+  
+    .tweet .actions button {
+      font-size: 12px;
+    }
+  
+    .tweet .comments-section .comment .comment-author {
+      font-size: 10px;
+    }
+  
+    .tweet .comments-section .comment .comment-text {
+      font-size: 10px;
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <ul class="navlist">
+        <li class="navitem navlink active"><a href="#">Home</a></li>
+        <li class="navitem navlink"><a href="perfil.html">Ver Perfil</a></li>
+            <input type="text" id="navbar-search-input" placeholder="Pesquisar...">
+            <button id="navbar-search-button">🔍</button>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="twit-container" id="tweets-container">
+    <!-- Tweets serão carregados aqui -->
+  </div>
+
+  <!-- Botão de criar tweet -->
+  <button id="create-twit-button">+</button>
+
+  <!-- Modal de criação de tweet -->
+  <div id="modal-backdrop" class="hidden"></div>
+  <div id="create-twit-modal" class="hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Criar Tweet</h3>
+        <button class="modal-close-button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="twit-input-element">
+          <label for="twit-text-input">Texto do Tweet:</label>
+          <textarea id="twit-text-input"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-cancel-button">Cancelar</button>
+        <button id="create-post-button" class="modal-accept-button">Publicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase e App Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+ // Configuração do Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAX52Zf503k8hH-3KTbnRhoVp7ZZFsAvVc",
+  authDomain: "dksocial-2ca10.firebaseapp.com",
+  databaseURL: "https://dksocial-2ca10-default-rtdb.firebaseio.com",
+  projectId: "dksocial-2ca10",
+  storageBucket: "dksocial-2ca10.appspot.com",
+  messagingSenderId: "227561021292",
+  appId: "1:227561021292:web:91b3a5c37fc6b9e6ae9d49",
+  measurementId: "G-LZ7B5D54S1"
+};
+
+// Inicializa o Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const database = firebase.database();
+
+// Elementos da página
+const tweetsContainer = document.getElementById('tweets-container');
+const navbarSearchInput = document.getElementById('navbar-search-input');
+const navbarSearchButton = document.getElementById('navbar-search-button');
+
+// Função para carregar todos os tweets
+const loadTweets = async (searchText = '') => {
+  const snapshot = await db.collection('tweets').orderBy('createdAt', 'desc').get();
+
+  // Limpa o container de tweets
+  tweetsContainer.innerHTML = "";
+
+  if (snapshot.empty) {
+    tweetsContainer.innerHTML = "<p>Nenhum post encontrado.</p>";
+    return;
+  }
+
+  // Exibe todos os tweets
+  snapshot.forEach(async (doc) => {
+    const post = doc.data();
+    const userRef = database.ref('users/' + post.userId);
+    const userSnapshot = await userRef.once('value');
+    const userData = userSnapshot.val();
+    const username = userData ? userData.username : "Anonymous";
+
+    // Filtra os tweets com base no texto de pesquisa
+    if (
+      post.text.toLowerCase().includes(searchText.toLowerCase()) ||
+      username.toLowerCase().includes(searchText.toLowerCase())
+    ) {
+      const tweetElement = document.createElement('div');
+      tweetElement.classList.add('tweet');
+      tweetElement.innerHTML = `
+        <div class="username">${username}</div>
+        <div class="text">${post.text}</div>
+        <div class="actions">
+          <button class="like-btn" data-post-id="${doc.id}">Curtir (${post.likes.length})</button>
+          <button class="comment-btn" data-post-id="${doc.id}">Comentar</button>
+        </div>
+        <div class="comments-section" id="comments-${doc.id}"></div>
+      `;
+      tweetsContainer.appendChild(tweetElement);
+
+      // Carrega os comentários
+      loadComments(doc.id, post.comments);
+
+      // Adiciona evento de like
+      tweetElement.querySelector('.like-btn').addEventListener('click', async () => {
+        await handleLike(doc.id, post.likes);
+      });
+
+      // Adiciona evento de comentário
+      tweetElement.querySelector('.comment-btn').addEventListener('click', () => {
+        const commentText = prompt("Digite seu comentário:");
+        if (commentText) {
+          handleComment(doc.id, commentText);
+        }
+      });
+    }
+  });
+};
+
+// Função para carregar comentários
+const loadComments = (postId, comments) => {
+  const commentsSection = document.getElementById(`comments-${postId}`);
+  commentsSection.innerHTML = "";
+
+  // Verifica se comments é um array antes de usar forEach
+  if (Array.isArray(comments)) {
+    comments.forEach((comment) => {
+      const commentElement = document.createElement('div');
+      commentElement.classList.add('comment');
+      commentElement.innerHTML = `
+        <div class="comment-author">${comment.username}</div>
+        <div class="comment-text">${comment.text}</div>
+      `;
+      commentsSection.appendChild(commentElement);
+    });
+  } else {
+    console.warn("O campo 'comments' não é um array ou está indefinido.");
+  }
+};
+
+// Função para curtir um tweet
+const handleLike = async (postId, likes) => {
+  const user = auth.currentUser;
+  const postRef = db.collection('tweets').doc(postId);
+
+  if (likes.includes(user.uid)) {
+    // Remove o like
+    await postRef.update({
+      likes: firebase.firestore.FieldValue.arrayRemove(user.uid),
+    });
+  } else {
+    // Adiciona o like
+    await postRef.update({
+      likes: firebase.firestore.FieldValue.arrayUnion(user.uid),
+    });
+  }
+
+  loadTweets(); // Recarrega os tweets para atualizar as curtidas
+};
+
+// Função para adicionar um comentário
+const handleComment = async (postId, commentText) => {
+  const user = auth.currentUser;
+  const userRef = database.ref('users/' + user.uid);
+  const userSnapshot = await userRef.once('value');
+  const userData = userSnapshot.val();
+  const username = userData ? userData.username : "Anonymous";
+
+  const newComment = {
+    text: commentText,
+    username: username,
+    createdAt: new Date(),
+  };
+
+  const postRef = db.collection('tweets').doc(postId);
+  await postRef.update({
+    comments: firebase.firestore.FieldValue.arrayUnion(newComment),
+  });
+
+  loadTweets(); // Recarrega os tweets para atualizar os comentários
+};
+
+// Função de pesquisa
+const searchTweets = (searchText) => {
+  loadTweets(searchText);
+};
+
+// Evento de pesquisa ao clicar no botão
+navbarSearchButton.addEventListener('click', () => {
+  const searchText = navbarSearchInput.value.trim();
+  searchTweets(searchText);
+});
+
+// Evento de pesquisa ao pressionar "Enter"
+navbarSearchInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const searchText = navbarSearchInput.value.trim();
+    searchTweets(searchText);
+  }
+});
+
+// Verifica se o usuário está logado
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("Usuário logado:", user.email);
+    loadTweets(); // Carrega os tweets ao logar
+  } else {
+    window.location.href = "index.html"; // Redireciona para a página de login
+  }
+});
+
+// Função para criar um novo post
+const createPost = async (postText) => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Você precisa estar logado para criar um post.");
+    return;
+  }
+
+  const userRef = database.ref('users/' + user.uid);
+  const userSnapshot = await userRef.once('value');
+  const userData = userSnapshot.val();
+  const username = userData ? userData.username : "Anonymous";
+  const profilePicture = userData.profilePicture || "https://via.placeholder.com/50"; // URL da foto de perfil
+
+  const newPost = {
+    text: postText,
+    userId: user.uid,
+    username: username,
+    profilePicture: profilePicture, // Adiciona a foto de perfil ao post
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    likes: [],
+    comments: []
+  };
+
+  try {
+    await db.collection('tweets').add(newPost); // Adiciona o post ao Firestore
+    loadTweets(); // Recarrega os tweets após criar um novo post
+    alert("Tweet criado com sucesso!");
+    document.getElementById('twit-text-input').value = ""; // Limpa o campo de texto
+    document.getElementById('create-twit-modal').classList.add('hidden'); // Fecha a modal
+    document.getElementById('modal-backdrop').classList.add('hidden'); // Fecha o backdrop
+  } catch (error) {
+    console.error("Erro ao criar tweet: ", error);
+    alert("Erro ao criar tweet. Tente novamente.");
+  }
+};
+
+// Eventos da modal
+document.addEventListener('DOMContentLoaded', function () {
+  // Abrir a modal
+  document.getElementById('create-twit-button').addEventListener('click', function () {
+    document.getElementById('create-twit-modal').classList.remove('hidden');
+    document.getElementById('modal-backdrop').classList.remove('hidden');
+  });
+
+  // Fechar a modal
+  const closeButton = document.querySelector('.modal-close-button');
+  if (closeButton) {
+    closeButton.addEventListener('click', function () {
+      document.getElementById('create-twit-modal').classList.add('hidden');
+      document.getElementById('modal-backdrop').classList.add('hidden');
+    });
+  } else {
+    console.error('Botão de fechar não encontrado!');
+  }
+
+  // Evento para publicar o tweet
+  document.getElementById('create-post-button').addEventListener('click', function () {
+    const postText = document.getElementById('twit-text-input').value.trim(); // Obtém o texto do tweet
+    if (postText) {
+      createPost(postText); // Chama a função para criar o post
+    } else {
+      alert("O tweet não pode estar vazio."); // Alerta se o texto estiver vazio
+    }
+  });
+
+  // Evento para cancelar e fechar a modal
+  document.querySelector('.modal-cancel-button').addEventListener('click', function () {
+    document.getElementById('create-twit-modal').classList.add('hidden');
+    document.getElementById('modal-backdrop').classList.add('hidden');
+  });
+});
+
+// Função para coletar posts curtidos e publicados pelo usuário
+const getUserPostsAndLikes = async (userId) => {
+    const userPosts = [];
+    const userLikes = [];
+  
+    // Coletar posts publicados pelo usuário
+    const postsSnapshot = await db.collection('tweets').where('userId', '==', userId).get();
+    postsSnapshot.forEach(doc => {
+      userPosts.push(doc.data());
+    });
+  
+    // Coletar posts curtidos pelo usuário
+    const likesSnapshot = await db.collection('tweets').where('likes', 'array-contains', userId).get();
+    likesSnapshot.forEach(doc => {
+      userLikes.push(doc.data());
+    });
+  
+    return { userPosts, userLikes };
+  };
+  
+  // Função para criar um perfil de interesses do usuário
+  const createUserInterestProfile = (userPosts, userLikes) => {
+    const interests = {};
+  
+    // Analisar posts publicados
+    userPosts.forEach(post => {
+      const words = post.text.split(' ');
+      words.forEach(word => {
+        if (word.length > 3) { // Ignorar palavras muito curtas
+          interests[word] = (interests[word] || 0) + 1;
+        }
+      });
+    });
+  
+    // Analisar posts curtidos
+    userLikes.forEach(post => {
+      const words = post.text.split(' ');
+      words.forEach(word => {
+        if (word.length > 3) { // Ignorar palavras muito curtas
+          interests[word] = (interests[word] || 0) + 1;
+        }
+      });
+    });
+  
+    return interests;
+  };
+  
+  // Função para recomendar posts com base no perfil de interesses
+  const recommendPosts = async (userId) => {
+    const { userPosts, userLikes } = await getUserPostsAndLikes(userId);
+    const userInterests = createUserInterestProfile(userPosts, userLikes);
+  
+    // Coletar todos os posts
+    const allPostsSnapshot = await db.collection('tweets').get();
+    const allPosts = [];
+    allPostsSnapshot.forEach(doc => {
+      allPosts.push(doc.data());
+    });
+  
+    // Calcular a similaridade entre os posts e o perfil de interesses do usuário
+    const recommendedPosts = allPosts.map(post => {
+      let score = 0;
+      const words = post.text.split(' ');
+      words.forEach(word => {
+        if (userInterests[word]) {
+          score += userInterests[word];
+        }
+      });
+      return { ...post, score };
+    }).filter(post => post.score > 0) // Filtrar posts com score maior que 0
+      .sort((a, b) => b.score - a.score); // Ordenar por score
+  
+    return recommendedPosts;
+  };
+  
+  // Função para exibir posts recomendados
+  const displayRecommendedPosts = async (userId) => {
+    const recommendedPosts = await recommendPosts(userId);
+    const recommendedContainer = document.getElementById('recommended-posts-container');
+  
+    recommendedContainer.innerHTML = "";
+  
+    if (recommendedPosts.length === 0) {
+      recommendedContainer.innerHTML = "<p>Nenhum post recomendado encontrado.</p>";
+      return;
+    }
+  
+    recommendedPosts.forEach(post => {
+      const postElement = document.createElement('div');
+      postElement.classList.add('tweet');
+      postElement.innerHTML = `
+ <img src="${profilePicture}" alt="${username}" class="profile-picture">
+        <div class="username">${post.username}</div>
+        <div class="text">${post.text}</div>
+        <div class="actions">
+          <button class="like-btn" data-post-id="${post.id}">Curtir (${post.likes.length})</button>
+          <button class="comment-btn" data-post-id="${post.id}">Comentar</button>
+        </div>
+        <div class="comments-section" id="comments-${post.id}"></div>
+      `;
+      recommendedContainer.appendChild(postElement);
+    });
+  };
+  </script>
+</body>
+</html>
