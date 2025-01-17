@@ -1,7 +1,12 @@
 {
   "routes": [
     {
-      "src": "/perfil.html/@(.*)",
+      "src": "/perfil.html/@([^/]+)", // Captura tudo após "/perfil.html/@"
+      "dest": "/perfil.html", // Direciona para o arquivo perfil.html
+      "status": 200
+    },
+    {
+      "src": "/perfil.html", // Rota para acessar sem username
       "dest": "/perfil.html",
       "status": 200
     }
