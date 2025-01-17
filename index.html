@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrar no DK</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <style>
+    /* Estilos existentes */
+    @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;600;800&display=swap");
+    :root {
+      --background-color: rgb(255, 255, 255);
+      --h1-input-color: rgb(0, 0, 0);
+      --label-color: rgb(0, 0, 0);
+      --username-password-color: rgb(0, 0, 0);
+      --username-password-background-color: rgb(245, 248, 250);
+      --username-password-border-color: rgb(101, 119, 134);
+      --username-password-focus-color: rgb(29, 161, 242);
+      --username-password-focus-border-color: rgb(29, 161, 242);
+      --entrar-background-color: rgb(151, 208, 248);
+      --entrar-color: rgb(255, 255, 255);
+      --entrar-hover-background-color: rgb(29, 161, 242);
+      --entrar-hover-color: rgb(255, 255, 255);
+      --signup-a-color: rgb(80, 174, 231);
+      --dot-color: rgb(101, 119, 134);
+    }
+    .darkMode {
+      --background-color: rgb(21, 32, 43);
+      --h1-input-color: rgb(255, 255, 255);
+      --label-color: rgb(255, 255, 255);
+      --username-password-color: rgb(136, 153, 166);
+      --username-password-background-color: rgb(25, 39, 52);
+      --username-password-border-color: rgb(136, 153, 166);
+      --entrar-background-color: rgb(25, 96, 142);
+      --entrar-color: rgb(138, 143, 148);
+      --entrar-hover-background-color: rgb(26, 145, 218);
+      --entrar-hover-color: rgb(255, 255, 255);
+      --signup-a-color: rgb(27, 149, 224);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: "Google Sans", sans-serif;
+      box-sizing: border-box;
+      border: none;
+    }
+    body {
+      user-select: none;
+      height: 100%;
+      background-color: var(--background-color);
+    }
+    div {
+      margin: 20px 0;
+    }
+    #login,
+    #signup,
+    #profile-setup {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 0;
+    }
+    img {
+      width: 100px;
+    }
+    .logo {
+      display: flex;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 35px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--h1-input-color);
+    }
+    label {
+      padding-left: 7px;
+      opacity: 70%;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--label-color);
+    }
+    input {
+      outline: 0;
+      font-size: 19px;
+      color: var(--h1-input-color);
+    }
+    .username,
+    .password,
+    .profile-picture {
+      background-color: var(--username-password-background-color);
+      border-bottom: 2px solid var(--username-password-border-color);
+    }
+    .username:focus-within,
+    .password:focus-within,
+    .profile-picture:focus-within {
+      color: var(--username-password-focus-color);
+      border-color: var(--username-password-focus-border-color);
+    }
+    .username,
+    .password,
+    .profile-picture,
+    .entrar {
+      padding-top: 8px;
+    }
+    .input-box {
+      padding: 2px 10px 5px;
+      margin: 0;
+    }
+    #user,
+    #password,
+    #signup-email,
+    #signup-password,
+    #profile-username,
+    #profile-picture {
+      width: 100%;
+      background: none;
+    }
+    #entrar,
+    #signup-button,
+    #profile-setup-button {
+      background-color: var(--entrar-background-color);
+      color: var(--entrar-color);
+      font-weight: bold;
+      width: 100%;
+      padding: 15px 10px 15px 10px;
+      border-radius: 9999px;
+      font-size: 14px;
+    }
+    #entrar:hover,
+    #signup-button:hover,
+    #profile-setup-button:hover {
+      background-color: var(--entrar-hover-background-color);
+      color: var(--entrar-hover-color);
+      cursor: pointer;
+    }
+    .signup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    .signup a {
+      color: var(--signup-a-color);
+      font-weight: 400;
+      margin: 0 5px;
+      text-align: center;
+      text-decoration: none;
+    }
+    .signup a:hover {
+      text-decoration: underline;
+    }
+    span.dot {
+      padding-bottom: 5px;
+      color: var(--dot-color);
+      font-weight: 400;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Tela de Login -->
+  <section id="login" class="screen">
+    <div class="header">
+      <div class="logo">
+        <img src="imgs/DKLogo.svg" alt="Book Icon" width="50" height="50">
+      </div>
+    </div>
+
+    <h1>Entrar no DK</h1>
+
+    <form>
+      <div class="username">
+        <label for="user">Celular, e-mail ou nome de usuário</label>
+        <br />
+        <div class="input-box input-user">
+          <input type="textarea" name="user" id="user" />
+        </div>
+      </div>
+
+      <div class="password">
+        <label for="password">Senha</label>
+        <br />
+        <div class="input-box input-password">
+          <input type="password" name="password" id="password" />
+        </div>
+      </div>
+
+      <div class="entrar">
+        <input type="button" name="entrar" id="entrar" value="Entrar" />
+      </div>
+    </form>
+
+    <footer class="signup">
+      <a href="#">Esqueceu sua senha?</a>
+      <span class="dot">.</span>
+      <a href="#" id="signup-link">Inscrever-se no DK</a>
+    </footer>
+  </section>
+
+  <!-- Tela de Inscrição -->
+  <section id="signup" class="screen" style="display: none;">
+    <div class="header">
+      <div class="logo">
+        <img id="img-logo" src="imgs/DKLogo.svg" />
+      </div>
+    </div>
+
+    <h1>Inscrever-se no DK</h1>
+
+    <form>
+      <div class="username">
+        <label for="signup-email">E-mail</label>
+        <br />
+        <div class="input-box input-user">
+          <input type="email" name="signup-email" id="signup-email" />
+        </div>
+      </div>
+
+      <div class="password">
+        <label for="signup-password">Senha</label>
+        <br />
+        <div class="input-box input-password">
+          <input type="password" name="signup-password" id="signup-password" />
+        </div>
+      </div>
+
+      <div class="entrar">
+        <input type="button" name="signup-button" id="signup-button" value="Inscrever-se" />
+      </div>
+    </form>
+
+    <footer class="signup">
+      <a href="#" id="login-link">Já tem uma conta? Entrar</a>
+    </footer>
+  </section>
+
+  <!-- Tela de Configuração de Perfil -->
+  <section id="profile-setup" class="screen" style="display: none;">
+    <div class="header">
+      <div class="logo">
+        <img id="img-logo" src="imgs/DKLogo.svg" />
+      </div>
+    </div>
+
+    <h1>Configuração de Perfil</h1>
+
+    <form>
+      <div class="username">
+        <label for="profile-username">Nome de Usuário</label>
+        <br />
+        <div class="input-box input-user">
+          <input type="text" name="profile-username" id="profile-username" />
+        </div>
+      </div>
+
+      <div class="profile-picture">
+        <label for="profile-picture">Foto de Perfil (URL)</label>
+        <br />
+        <div class="input-box input-picture">
+          <input type="text" name="profile-picture" id="profile-picture" placeholder="Cole a URL da sua foto" />
+        </div>
+      </div>
+
+      <div class="entrar">
+        <input type="button" name="profile-setup-button" id="profile-setup-button" value="Salvar" />
+      </div>
+    </form>
+  </section>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAX52Zf503k8hH-3KTbnRhoVp7ZZFsAvVc",
+      authDomain: "dksocial-2ca10.firebaseapp.com",
+      projectId: "dksocial-2ca10",
+      storageBucket: "dksocial-2ca10.appspot.com",
+      messagingSenderId: "227561021292",
+      appId: "1:227561021292:web:91b3a5c37fc6b9e6ae9d49",
+      measurementId: "G-LZ7B5D54S1",
+      databaseURL: "https://dksocial-2ca10-default-rtdb.firebaseio.com/" // URL do Realtime Database
+    };
+
+    // Inicializar o Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Alternar entre as telas de login e inscrição
+    document.getElementById('signup-link').addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('signup').style.display = 'block';
+    });
+
+    document.getElementById('login-link').addEventListener('click', function (e) {
+      e.preventDefault();
+      document.getElementById('signup').style.display = 'none';
+      document.getElementById('login').style.display = 'block';
+    });
+
+    // Lógica de Login
+    document.getElementById('entrar').addEventListener('click', function () {
+      const email = document.getElementById('user').value;
+      const password = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Login bem-sucedido
+          const user = userCredential.user;
+          alert('Login bem-sucedido! Redirecionando...');
+          window.location.href = 'home.html';
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert('Erro ao fazer login: ' + errorMessage);
+        });
+    });
+
+    // Lógica de Inscrição
+    document.getElementById('signup-button').addEventListener('click', function () {
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Inscrição bem-sucedida
+          const user = userCredential.user;
+          alert('Inscrição bem-sucedida! Configure seu perfil.');
+          document.getElementById('signup').style.display = 'none';
+          document.getElementById('profile-setup').style.display = 'block';
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert('Erro ao inscrever-se: ' + errorMessage);
+        });
+    });
+
+    // Lógica de Configuração de Perfil
+document.getElementById('profile-setup-button').addEventListener('click', function () {
+  const username = document.getElementById('profile-username').value;
+  const profilePictureURL = document.getElementById('profile-picture').value;
+
+  if (username) {
+    const user = auth.currentUser;
+
+    if (user) {
+      // Salvar o nome de usuário e a URL da foto no Realtime Database
+      const userData = {
+        username: username,
+        profilePicture: profilePictureURL || null // Usar a URL da foto ou null se não for fornecida
+      };
+
+      database.ref('users/' + user.uid).set(userData)
+        .then(() => {
+          // Armazenar a flag no localStorage indicando que o setup foi concluído
+          localStorage.setItem('profileSetupCompleted', 'true');
+          alert('Perfil configurado com sucesso! Redirecionando...');
+          window.location.href = 'home.html';
+        })
+        .catch((error) => {
+          alert('Erro ao salvar o perfil: ' + error.message);
+        });
+    } else {
+      alert('Usuário não autenticado. Por favor, faça login novamente.');
+    }
+  } else {
+    alert('Por favor, insira um nome de usuário.');
+  }
+});
+
+// Verificar se o setup do perfil já foi concluído ao carregar a página
+document.addEventListener('DOMContentLoaded', function () {
+  const profileSetupCompleted = localStorage.getItem('profileSetupCompleted');
+
+  if (profileSetupCompleted === 'true') {
+    // Redirecionar para a página home.html se o setup já foi concluído
+    window.location.href = 'home.html';
+  }
+});
+  </script>
+</body>
+
+</html>
