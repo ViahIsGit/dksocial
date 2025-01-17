@@ -96,51 +96,64 @@
         return null; // Retorna null se não encontrar o username
     }
 
-    // Função para carregar o perfil do usuário pelo username (Firestore)
-    async function loadProfileByUsername(username) {
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', username)); // Consulta pelo username
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            querySnapshot.forEach((doc) => {
-                const userData = doc.data();
-                console.log('Dados do usuário encontrados:', userData); // Log para depuração
-                document.getElementById('profile-username').textContent = userData.username;
-                if (userData.profilePicture) {
-                    document.getElementById('profile-picture').src = userData.profilePicture;
+    // Função para carregar o perfil do usuário pelo username (Realtime Database)
+    function loadProfileByUsername(username) {
+        const usersRef = ref(database, 'users'); // Referência ao nó "users" no Realtime Database
+        onValue(usersRef, (snapshot) => {
+            const users = snapshot.val(); // Obtém todos os usuários
+            if (users) {
+                // Procura o usuário com o username correspondente
+                const user = Object.values(users).find(u => u.username === username);
+                if (user) {
+                    console.log('Dados do usuário encontrados:', user); // Log para depuração
+                    document.getElementById('profile-username').textContent = user.username;
+                    if (user.profilePicture) {
+                        document.getElementById('profile-picture').src = user.profilePicture;
+                    }
+                    // Carregar os posts do usuário (Firestore)
+                    loadPosts(user.uid);
+                } else {
+                    console.error('Usuário não encontrado.');
+                    document.getElementById('profile-username').textContent = 'Usuário não encontrado.';
                 }
-                // Carregar posts ou outras informações do usuário
-            });
-        } else {
-            console.error('Usuário não encontrado.');
-            document.getElementById('profile-username').textContent = 'Usuário não encontrado.';
-        }
-    }
-
-    // Função para carregar o perfil do usuário logado (Realtime Database)
-    function loadProfile(uid) {
-        const userRef = ref(database, 'users/' + uid); // Referência ao nó do usuário no Realtime Database
-        onValue(userRef, (snapshot) => {
-            const userData = snapshot.val(); // Obtém os dados do usuário
-            if (userData) {
-                // Atualiza o nome de usuário na página
-                document.getElementById('profile-username').textContent = userData.username;
-
-                // Atualiza a foto de perfil, se existir
-                if (userData.profilePicture) {
-                    document.getElementById('profile-picture').src = userData.profilePicture;
-                }
-
-                // Gera o link personalizado com o username
-                const profileLink = `https://dksocialbr.vercel.app/perfil.html/@${userData.username}`;
-                document.getElementById('profile-link').innerHTML = `<a href="${profileLink}" target="_blank">${profileLink}</a>`;
             } else {
-                console.error('Dados do usuário não encontrados.');
+                console.error('Nenhum usuário encontrado no banco de dados.');
             }
         }, (error) => {
             console.error('Erro ao carregar perfil:', error);
         });
+    }
+
+    // Função para carregar os posts do usuário (Firestore)
+    async function loadPosts(uid) {
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = ''; // Limpar posts anteriores
+
+        try {
+            // Consulta para buscar os posts do usuário
+            const postsQuery = query(collection(db, 'tweets'), where('userId', '==', uid));
+            const querySnapshot = await getDocs(postsQuery);
+
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const postElement = document.createElement('div');
+                    postElement.className = 'post';
+                    postElement.innerHTML = `
+                        <img src="${post.profilePicture}" alt="Foto de Perfil" style="width: 50px; height: 50px; border-radius: 50%;">
+                        <p><strong>${post.username}</strong></p>
+                        <p>${post.text}</p>
+                        <small>Postado em: ${post.createdAt.toDate().toLocaleString()}</small>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            } else {
+                postsContainer.innerHTML = '<p>Nenhum post encontrado.</p>';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar posts:', error);
+            postsContainer.innerHTML = '<p>Erro ao carregar posts. Tente novamente mais tarde.</p>';
+        }
     }
 
     // Verifique se o usuário está autenticado
@@ -153,7 +166,7 @@
                 loadProfileByUsername(usernameFromUrl);
             } else {
                 // Se não houver username na URL, carregar o perfil do usuário logado
-                loadProfile(user.uid);
+                loadProfileByUsername(user.username); // Supondo que o username do usuário logado esteja disponível
             }
         } else {
             // Usuário não autenticado, redirecionar para a página de login
