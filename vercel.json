@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {
+      "src": "/perfil.html/@(.*)",
+      "dest": "/perfil.html",
+      "status": 200
+    }
+  ]
+}
