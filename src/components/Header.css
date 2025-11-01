@@ -1,0 +1,173 @@
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--md-sys-color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.navbar {
+  width: 100%;
+  height: 64px;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 8px;
+  gap: 16px;
+  max-width: 100%;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.menu-button {
+  transition: transform 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Mobile - ocultar botão de menu */
+@media (max-width: 959px) {
+  .menu-button.desktop-menu {
+    display: none;
+  }
+}
+
+/* Desktop - mostrar botão de menu */
+@media (min-width: 960px) {
+  .menu-button.desktop-menu {
+    display: flex;
+  }
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  color: var(--md-sys-color-on-surface);
+  padding: 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.navbar-logo md-icon {
+  color: var(--md-sys-color-primary);
+  font-size: 24px;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: 24px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.header-search:focus-within {
+  background: var(--md-sys-color-surface);
+  border-color: var(--md-sys-color-outline);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.search-icon {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.9375rem;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  outline: none;
+  min-width: 0;
+  letter-spacing: 0.01em;
+}
+
+.search-input::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.search-clear {
+  flex-shrink: 0;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 0 8px;
+}
+
+.navbar-right md-icon-button {
+  transition: background-color 0.2s ease;
+}
+
+.navbar-right md-icon-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .navbar-content {
+    padding: 0 16px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 960px) {
+  .navbar-content {
+    padding: 0 24px;
+  }
+  
+  .navbar-logo {
+    display: none;
+  }
+
+  .navbar-center {
+    max-width: 600px;
+  }
+}
+
+/* Mobile - ocultar logo quando drawer abrir */
+@media (max-width: 959px) {
+  .drawer-open .navbar-logo {
+    display: none;
+  }
+}
+

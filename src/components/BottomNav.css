@@ -1,0 +1,184 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--md-sys-color-surface-container);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2), 0 -2px 8px rgba(0, 0, 0, 0.15);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-nav-items {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0;
+  height: 64px;
+  max-height: 64px;
+  position: relative;
+}
+
+.bottom-nav-fab-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 0 -8px;
+  z-index: 10;
+}
+
+.bottom-nav-fab {
+  --md-fab-container-color: var(--md-sys-color-primary-container);
+  --md-fab-container-shape: 28px;
+  --md-fab-icon-color: var(--md-sys-color-on-primary-container);
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  top: -12px;
+}
+
+.bottom-nav-fab:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25), 0 4px 6px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.bottom-nav-fab:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--md-sys-color-on-surface-variant);
+  min-width: 0;
+  position: relative;
+  max-width: 100px;
+  border-radius: 30px;
+  width: 56px;
+  height: 56px;
+}
+
+.bottom-nav-item:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: 30px;
+}
+
+.bottom-nav-item:active {
+  transform: scale(0.95);
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: 30px;
+}
+
+.bottom-nav-item.active {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: 30px;
+}
+
+.bottom-nav-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.bottom-nav-icon {
+  font-size: 24px;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color 0.2s ease;
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+  color: var(--md-sys-color-primary);
+}
+
+.bottom-nav-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  letter-spacing: 0.01em;
+}
+
+.bottom-nav-item.active .bottom-nav-label {
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  padding: 0 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.01em;
+}
+
+/* Desktop - ocultar bottom nav */
+@media (min-width: 960px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 959px) {
+  .bottom-nav-items {
+    padding: 12px 0;
+    height: 72px;
+    max-height: 72px;
+  }
+
+  .bottom-nav-icon {
+    font-size: 28px;
+  }
+
+  .bottom-nav-label {
+    font-size: 0.8125rem;
+  }
+
+  .bottom-nav-icon-container {
+    width: 28px;
+    height: 28px;
+  }
+
+  .bottom-nav-fab {
+    width: 64px;
+    height: 64px;
+    top: -16px;
+  }
+}
+
