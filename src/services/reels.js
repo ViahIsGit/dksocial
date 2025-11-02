@@ -1,23 +1,24 @@
-import { db, auth } from '../firebase/config'
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  addDoc, 
-  updateDoc,
-  setDoc,
-  deleteDoc,
-  query, 
-  orderBy, 
-  where, 
-  limit,
-  arrayUnion,
-  arrayRemove,
-  increment,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore'
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { 
+    getFirestore,
+    collection, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    setDoc, 
+    deleteDoc, 
+    query, 
+    orderBy, 
+    where, 
+    limit,
+    arrayUnion, 
+    arrayRemove, 
+    increment, 
+    serverTimestamp, 
+    Timestamp 
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 /**
  * Busca o perfil de um usuário no Firestore.
@@ -823,4 +824,5 @@ export async function getAllReposts(reelId) {
     return []
   }
 }
+
 
