@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { auth } from '../firebase/config'
+import { auth, onAuthStateChanged } from '../firebase/config'
 import { fetchReels, incrementViews } from '../services/reels'
 import VideoCard from './VideoCard'
 import './Feed.css'
@@ -194,5 +193,4 @@ function Feed() {
 }
 
 export default Feed
-
 

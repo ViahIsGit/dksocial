@@ -55,8 +55,8 @@
 }
 
 * {
-  -webkit-tap-highlight-color: transparent;
   margin: 0;
+  -webkit-highlight-color: none;
   padding: 0;
   box-sizing: border-box;
 }

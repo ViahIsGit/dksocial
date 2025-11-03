@@ -1,6 +1,26 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"; 
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js'
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js'
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  where,
+  limit,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  serverTimestamp,
+  Timestamp
+} from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js'
+import { getStorage } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyCyvYMhxJWXZdCB60MBrZFKeONnR4fXDcc",
@@ -18,7 +38,27 @@ const app = initializeApp(firebaseConfig)
 // Inicializar serviços
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+export const storage = getStorage(app)
+export { onAuthStateChanged }
+export {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  where,
+  limit,
+  arrayUnion,
+  arrayRemove,
+  increment,
+  serverTimestamp,
+  Timestamp
+}
 
 export default app
-
 

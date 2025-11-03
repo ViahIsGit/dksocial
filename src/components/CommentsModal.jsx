@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../firebase/config'
+import { auth, onAuthStateChanged } from '../firebase/config'
 import { getComments, addComment, likeComment, unlikeComment } from '../services/reels'
 import AlertDialog from './AlertDialog'
 import './CommentsModal.css'
