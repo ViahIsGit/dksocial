@@ -168,9 +168,22 @@ export async function createReel({ videoFile, thumbnailFile, desc, onProgress })
     if (onProgress) onProgress(80)
 
     console.log("Salvando no Firestore...")
+    // Normalizar URL para compatibilidade mobile (mp4/h264)
+    const toMobileVideoUrl = (url) => {
+      try {
+        const u = new URL(url)
+        if (u.hostname.includes('cloudinary') && u.pathname.includes('/upload/')) {
+          const parts = u.pathname.split('/upload/')
+          u.pathname = `${parts[0]}/upload/f_mp4,vc_h264,q_auto/${parts[1]}`
+          return u.toString()
+        }
+      } catch {}
+      return url
+    }
+
     // Salvar no Firestore
     const reel = {
-      videoUrl: data.secure_url,
+      videoUrl: toMobileVideoUrl(data.secure_url),
       thumbnailUrl: thumbnailUrl,
       desc: desc || '',
       userId: auth.currentUser.uid,

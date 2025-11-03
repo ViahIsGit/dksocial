@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { auth, onAuthStateChanged } from '../firebase/config'
 import { getComments, addComment, likeComment, unlikeComment } from '../services/reels'
-import AlertDialog from './AlertDialog'
+ 
 import './CommentsModal.css'
 
 function CommentsModal({ reelId, onClose, currentUser }) {
@@ -108,7 +108,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
         <div className="comments-list">
           {loading ? (
             <div className="comments-loading">
-              <md-circular-progress indeterminate></md-circular-progress>
+              <md-linear-progress value="0.5" buffer="0.8"></md-linear-progress>
               <span>Carregando comentários...</span>
             </div>
           ) : comments.length === 0 ? (
@@ -181,12 +181,17 @@ function CommentsModal({ reelId, onClose, currentUser }) {
         )}
       </div>
 
-      <AlertDialog
-        open={alertDialog.open}
-        title={alertDialog.title}
-        message={alertDialog.message}
-        onClose={() => setAlertDialog({ open: false, title: '', message: '' })}
-      />
+      {alertDialog.open && (
+        <md-dialog open style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
+          <form slot="content" id="comments-alert-form" method="dialog">
+            <h3 style={{ margin: 0 }}>{alertDialog.title}</h3>
+            <p style={{ marginTop: 8 }}>{alertDialog.message}</p>
+          </form>
+          <div slot="actions">
+            <md-text-button form="comments-alert-form" value="ok" onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
+          </div>
+        </md-dialog>
+      )}
     </div>
   )
 }

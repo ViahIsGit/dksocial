@@ -69,6 +69,11 @@ function ShareModal({ video, onClose, currentUser, onShare }) {
   return (
     <div className="share-modal-overlay" onClick={onClose}>
       <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+        {sharing && (
+          <div style={{ padding: '8px 0' }}>
+            <md-linear-progress value="0.5" buffer="0.8"></md-linear-progress>
+          </div>
+        )}
         <div className="share-header">
           <h2 className="share-title">Compartilhar</h2>
           <md-icon-button onClick={onClose} className="close-button">

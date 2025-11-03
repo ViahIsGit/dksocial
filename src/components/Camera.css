@@ -1,0 +1,19 @@
+.camera-page { position: relative; width: 100%; height: 100vh; height: 100dvh; background: #000; overflow: hidden; }
+.camera-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.camera-canvas { position: absolute; inset: 0; }
+.camera-topbar { position: absolute; top: 0; left: 0; right: 0; padding: 12px; display: flex; gap: 8px; justify-content: flex-end; background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0)); z-index: 2; }
+.camera-bottombar { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; background: linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,0)); z-index: 2; }
+.mode-switch { display: flex; gap: 12px; }
+.mode-btn { background: transparent; color: var(--md-sys-color-on-surface); opacity: .8; border: 0; font-weight: 700; letter-spacing: 1px; }
+.mode-btn.active { opacity: 1; color: var(--md-sys-color-primary); }
+.shutter-row { display: flex; align-items: center; justify-content: center; gap: 28px; }
+.side-btn { --md-sys-color-on-surface: #fff; color: #fff; }
+.shutter { width: 78px; height: 78px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,.6); display: grid; place-items: center; }
+.shutter .inner { width: 60px; height: 60px; border-radius: 50%; background: #fff; }
+.shutter.recording { border-color: rgba(255,0,0,.9); }
+.shutter.recording .inner { background: #ff1744; }
+.selection-info { color: #fff; display: flex; align-items: center; gap: 8px; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.camera-progress { position: absolute; top: 0; left: 0; right: 0; z-index: 3; }
+.camera-permission { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; background: linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.2)); }
+.camera-permission-card { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); border: 1px solid var(--md-sys-color-outline); border-radius: 16px; padding: 20px; display: grid; gap: 12px; place-items: center; }
+

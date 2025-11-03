@@ -3,11 +3,15 @@ import Header from './components/Header'
 import NavigationDrawer from './components/NavigationDrawer'
 import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
+import Messages from './components/Messages'
+import Camera from './components/Camera'
+import { LayoutProvider, useLayout } from './context/LayoutContext'
 import './App.css'
 
-function App() {
+function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('feed')
+  const { chromeHidden } = useLayout()
 
   const handleMenuClick = () => {
     setDrawerOpen(!drawerOpen)
@@ -23,29 +27,36 @@ function App() {
   }
 
   const handleFABClick = () => {
-    // Lógica para ação do FAB
-    console.log('FAB clicado!')
-    // Exemplo: abrir modal de criar novo vídeo
-    alert('Criar novo vídeo!')
+    setActiveTab('camera')
   }
 
-  const showHeader = activeTab !== 'feed'
+  const showHeader = !chromeHidden && activeTab !== 'feed'
 
   return (
     <div className={`App ${drawerOpen ? 'drawer-open' : ''} ${!showHeader ? 'no-header' : ''}`}>
-      {showHeader && <Header onMenuClick={handleMenuClick} drawerOpen={drawerOpen} />}
+      {showHeader && <Header onMenuClick={handleMenuClick} drawerOpen={drawerOpen} activeTab={activeTab} />} 
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
       <div className="app-main">
-        <Feed />
+        {activeTab === 'feed' && <Feed />}
+        {activeTab === 'messages' && <Messages />}
+        {activeTab === 'camera' && <Camera />}
       </div>
-      <BottomNav 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange}
-        onFABClick={handleFABClick}
-      />
+      {!chromeHidden && (
+        <BottomNav 
+          activeTab={activeTab} 
+          onTabChange={handleTabChange}
+          onFABClick={handleFABClick}
+        />
+      )}
     </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <LayoutProvider>
+      <AppShell />
+    </LayoutProvider>
+  )
+}
 

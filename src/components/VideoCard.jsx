@@ -2,13 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel } from '../services/reels'
 import CommentsModal from './CommentsModal'
 import ShareModal from './ShareModal'
-import AlertDialog from './AlertDialog'
 import './VideoCard.css'
 
-function VideoCard({ video, currentUser }) {
+function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPlayRequest }) {
   const [isLiked, setIsLiked] = useState(video.isLiked || false)
   const [isFavorited, setIsFavorited] = useState(video.isFavorited || false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(!isFirst)
+  const [isMuted, setIsMuted] = useState(isFirst ? true : false)
+  const videoRef = useRef(null)
   const [likes, setLikes] = useState(video.likes || 0)
   const [shares, setShares] = useState(video.shares || 0)
   const [showComments, setShowComments] = useState(false)
@@ -72,17 +73,35 @@ function VideoCard({ video, currentUser }) {
   }
 
   const handlePlay = () => {
-    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`)
+    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
     if (videoElement) {
       if (isPlaying) {
         videoElement.pause()
         setIsPlaying(false)
       } else {
+        if (isFirst && isMuted) {
+          videoElement.muted = false
+          setIsMuted(false)
+        }
         videoElement.play().catch(console.error)
         setIsPlaying(true)
+        if (onPlayRequest) onPlayRequest(String(video.id))
       }
     } else {
       setIsPlaying(!isPlaying)
+    }
+  }
+
+  const handleToggleMute = (e) => {
+    e.stopPropagation()
+    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`)
+    if (!videoElement) return
+    const nextMuted = !isMuted
+    videoElement.muted = nextMuted
+    setIsMuted(nextMuted)
+    if (!nextMuted) {
+      // Garantir play com som após gesto do usuário
+      videoElement.play().catch(() => {})
     }
   }
 
@@ -147,8 +166,16 @@ function VideoCard({ video, currentUser }) {
   }, [video.id, performLike])
   
   useEffect(() => {
-    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`)
+    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
     if (videoElement) {
+      // Forçar atributos para autoplay inline e mudo por padrão (desbloqueia autoplay em mobile)
+      videoElement.setAttribute('playsinline', '')
+      videoElement.autoplay = true
+      videoElement.muted = isMuted
+      // Tentar dar play assim que possível
+      const tryPlay = () => videoElement.play().catch(() => {})
+      if (videoElement.readyState >= 2) tryPlay(); else videoElement.addEventListener('loadeddata', tryPlay, { once: true })
+
       videoElement.addEventListener('ended', () => {
         setIsPlaying(false)
       })
@@ -157,7 +184,24 @@ function VideoCard({ video, currentUser }) {
         videoElement.removeEventListener('ended', () => {})
       }
     }
-  }, [video.id])
+  }, [video.id, isMuted])
+
+  // Reagir à ativação/desativação vinda do Feed
+  useEffect(() => {
+    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
+    if (!videoElement) return
+    if (isActive) {
+      // Ativar reprodução deste e pausar outros via Feed
+      if (isFirst && isMuted) {
+        // só desmutar quando o usuário realmente tocar; manter mudo aqui
+      }
+      videoElement.play().catch(() => {})
+      setIsPlaying(true)
+    } else {
+      videoElement.pause()
+      setIsPlaying(false)
+    }
+  }, [isActive, isFirst, isMuted, video.id])
 
   const handleShareClick = () => {
     if (!currentUser) {
@@ -202,11 +246,15 @@ function VideoCard({ video, currentUser }) {
         <video
           className="video-player"
           data-video-id={video.id}
+          ref={videoRef}
           src={video.videoUrl}
           poster={video.thumbnail}
+          preload="metadata"
+          crossOrigin="anonymous"
           loop
           playsInline
-          muted
+          muted={isMuted}
+          autoPlay
           onClick={handlePlay}
           style={{ display: isPlaying ? 'block' : 'none' }}
         />
@@ -228,6 +276,10 @@ function VideoCard({ video, currentUser }) {
               <md-icon>pause_circle</md-icon>
             </div>
           )}
+          {/* Botão de som */}
+          <div className="mute-toggle" onClick={handleToggleMute}>
+            <md-icon>{isMuted ? 'volume_off' : 'volume_up'}</md-icon>
+          </div>
         </div>
         
         <div className="video-duration-badge">{video.duration}</div>
@@ -292,12 +344,17 @@ function VideoCard({ video, currentUser }) {
         />
       )}
 
-      <AlertDialog
-        open={alertDialog.open}
-        title={alertDialog.title}
-        message={alertDialog.message}
-        onClose={() => setAlertDialog({ open: false, title: '', message: '' })}
-      />
+      {alertDialog.open && (
+        <md-dialog open style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
+          <form slot="content" id={`video-alert-form-${video.id}`} method="dialog">
+            <h3 style={{ margin: 0 }}>{alertDialog.title}</h3>
+            <p style={{ marginTop: 8 }}>{alertDialog.message}</p>
+          </form>
+          <div slot="actions">
+            <md-text-button form={`video-alert-form-${video.id}`} value="ok" onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
+          </div>
+        </md-dialog>
+      )}
     </div>
   )
 }
