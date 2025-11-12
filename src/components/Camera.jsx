@@ -17,6 +17,7 @@ function Camera() {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [dialog, setDialog] = useState({ open: false, title: '', message: '' })
+  const dialogRef = useRef(null)
   const [mode, setMode] = useState('photo') // 'photo' | 'video'
   const [facingMode, setFacingMode] = useState('user') // 'user' | 'environment'
   const [cameraError, setCameraError] = useState('')
@@ -34,6 +35,17 @@ function Camera() {
       showChrome()
     }
   }, [hideChrome, showChrome, facingMode])
+
+  // Controlar o md-dialog usando os métodos show() e close()
+  useEffect(() => {
+    if (dialogRef.current) {
+      if (dialog.open) {
+        dialogRef.current.show()
+      } else {
+        dialogRef.current.close()
+      }
+    }
+  }, [dialog.open])
 
   const startCamera = async () => {
     try {
@@ -186,7 +198,7 @@ function Camera() {
           >
             <span className="inner" />
           </button>
-          <md-icon-button className="side-btn" onClick={handleUpload} disabled={!selectedFile} aria-label="Postar">
+          <md-icon-button className="side-btn" onClick={handleUpload} aria-label="Postar">
             <md-icon>send</md-icon>
           </md-icon-button>
         </div>
@@ -205,17 +217,18 @@ function Camera() {
         </div>
       )}
 
-      {dialog.open && (
-        <md-dialog open style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
-          <form slot="content" id="camera-dialog-form" method="dialog">
-            <h3 style={{ margin: 0 }}>{dialog.title}</h3>
-            <p style={{ marginTop: 8 }}>{dialog.message}</p>
-          </form>
-          <div slot="actions">
-            <md-text-button form="camera-dialog-form" value="ok" onClick={() => setDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
-          </div>
-        </md-dialog>
-      )}
+      <md-dialog 
+        ref={dialogRef}
+        onClose={() => setDialog({ open: false, title: '', message: '' })}
+      >
+        <div slot="headline">{dialog.title}</div>
+        <form slot="content" method="dialog">
+          <p>{dialog.message}</p>
+        </form>
+        <div slot="actions">
+          <md-text-button onClick={() => setDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
+        </div>
+      </md-dialog>
     </div>
   )
 }

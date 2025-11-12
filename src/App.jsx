@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Header from './components/Header'
 import NavigationDrawer from './components/NavigationDrawer'
 import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
@@ -30,11 +29,8 @@ function AppShell() {
     setActiveTab('camera')
   }
 
-  const showHeader = !chromeHidden && activeTab !== 'feed'
-
   return (
-    <div className={`App ${drawerOpen ? 'drawer-open' : ''} ${!showHeader ? 'no-header' : ''}`}>
-      {showHeader && <Header onMenuClick={handleMenuClick} drawerOpen={drawerOpen} activeTab={activeTab} />} 
+    <div className={`App ${drawerOpen ? 'drawer-open' : ''} no-header`}>
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
       <div className="app-main">
         {activeTab === 'feed' && <Feed />}

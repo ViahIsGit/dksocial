@@ -30,9 +30,6 @@ function Header({ onMenuClick, drawerOpen, activeTab }) {
               <md-icon>{drawerOpen ? 'close' : 'menu'}</md-icon>
             </md-icon-button>
             
-            <div className="navbar-logo">
-              <md-icon>{currentIcon}</md-icon>
-            </div>
           </div>
 
           <div className="navbar-center">
@@ -45,7 +42,7 @@ function Header({ onMenuClick, drawerOpen, activeTab }) {
               const menu = document.getElementById('apps-menu')
               if (menu) menu.open = true
             }}>
-              <md-icon>apps</md-icon>
+              <md-icon style={{ fontSize: 27 }}>apps</md-icon>
             </md-icon-button>
             <md-menu id="apps-menu" anchor="apps-anchor">
               <md-menu-item>
@@ -60,7 +57,7 @@ function Header({ onMenuClick, drawerOpen, activeTab }) {
             </md-menu>
                     
             <md-icon-button aria-label="Conta">
-              <md-icon>account_circle</md-icon>
+              <md-icon style={{ fontSize: 27 }}>account_circle</md-icon>
             </md-icon-button>
           </div>
         </div>

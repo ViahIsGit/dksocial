@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel } from '../services/reels'
+import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel, followUser, unfollowUser, isFollowing } from '../services/reels'
 import CommentsModal from './CommentsModal'
 import ShareModal from './ShareModal'
 import './VideoCard.css'
@@ -15,6 +15,9 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   const [showComments, setShowComments] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [alertDialog, setAlertDialog] = useState({ open: false, title: '', message: '' })
+  const alertDialogRef = useRef(null)
+  const [isFollowingUser, setIsFollowingUser] = useState(false)
+  const [isFriend, setIsFriend] = useState(false)
   
   useEffect(() => {
     setIsLiked(video.isLiked || false)
@@ -22,6 +25,41 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     setLikes(video.likes || 0)
     setShares(video.shares || 0)
   }, [video])
+
+  // Verificar se está seguindo o usuário e se são amigos
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!currentUser || !video.userId || video.userId === currentUser.uid) return
+      
+      try {
+        const following = await isFollowing(video.userId, currentUser.uid)
+        setIsFollowingUser(following)
+        
+        // Verificar se são amigos (follow mútuo)
+        if (following) {
+          const mutualFollow = await isFollowing(currentUser.uid, video.userId)
+          setIsFriend(mutualFollow)
+        } else {
+          setIsFriend(false)
+        }
+      } catch (error) {
+        console.error("Erro ao verificar status de follow:", error)
+      }
+    }
+    
+    checkFollowStatus()
+  }, [currentUser, video.userId])
+
+  // Controlar o md-dialog usando os métodos show() e close()
+  useEffect(() => {
+    if (alertDialogRef.current) {
+      if (alertDialog.open) {
+        alertDialogRef.current.show()
+      } else {
+        alertDialogRef.current.close()
+      }
+    }
+  }, [alertDialog.open])
 
   // Função para dar like (pode ser chamada pelo botão ou double tap)
   const performLike = useCallback(async () => {
@@ -76,16 +114,31 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
     if (videoElement) {
       if (isPlaying) {
+        // Pausar este vídeo
         videoElement.pause()
         setIsPlaying(false)
       } else {
+        // Pausar todos os outros vídeos antes de dar play neste
+        const allVideos = document.querySelectorAll('.video-player')
+        allVideos.forEach(v => {
+          if (v.getAttribute('data-video-id') !== String(video.id)) {
+            v.pause()
+          }
+        })
+        
+        // Desmutar se necessário
         if (isFirst && isMuted) {
           videoElement.muted = false
           setIsMuted(false)
         }
-        videoElement.play().catch(console.error)
-        setIsPlaying(true)
-        if (onPlayRequest) onPlayRequest(String(video.id))
+        
+        // Dar play neste vídeo
+        videoElement.play()
+          .then(() => {
+            setIsPlaying(true)
+            if (onPlayRequest) onPlayRequest(String(video.id))
+          })
+          .catch(console.error)
       }
     } else {
       setIsPlaying(!isPlaying)
@@ -170,38 +223,70 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     if (videoElement) {
       // Forçar atributos para autoplay inline e mudo por padrão (desbloqueia autoplay em mobile)
       videoElement.setAttribute('playsinline', '')
-      videoElement.autoplay = true
       videoElement.muted = isMuted
-      // Tentar dar play assim que possível
-      const tryPlay = () => videoElement.play().catch(() => {})
-      if (videoElement.readyState >= 2) tryPlay(); else videoElement.addEventListener('loadeddata', tryPlay, { once: true })
-
-      videoElement.addEventListener('ended', () => {
-        setIsPlaying(false)
-      })
       
-      return () => {
-        videoElement.removeEventListener('ended', () => {})
+      // Verificar se a URL do vídeo é válida
+      if (video.videoUrl) {
+        videoElement.src = video.videoUrl
+        // Adicionar listener para erros de carregamento
+        const handleError = (e) => {
+          console.error('Erro ao carregar vídeo:', e, video.videoUrl)
+          // Tentar usar a URL original sem transformações se houver erro
+          if (video.videoUrl.includes('cloudinary') && video.videoUrl.includes(',')) {
+            const originalUrl = video.videoUrl.replace(/\/upload\/[^/]+\//, '/upload/')
+            videoElement.src = originalUrl
+          }
+        }
+        videoElement.addEventListener('error', handleError)
+        
+        // Não dar autoplay aqui - será controlado pelo isActive
+        videoElement.addEventListener('ended', () => {
+          setIsPlaying(false)
+        })
+        
+        return () => {
+          videoElement.removeEventListener('ended', () => {})
+          videoElement.removeEventListener('error', handleError)
+        }
       }
     }
-  }, [video.id, isMuted])
+  }, [video.id, video.videoUrl, isMuted])
 
   // Reagir à ativação/desativação vinda do Feed
   useEffect(() => {
     const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
     if (!videoElement) return
+    
     if (isActive) {
-      // Ativar reprodução deste e pausar outros via Feed
-      if (isFirst && isMuted) {
-        // só desmutar quando o usuário realmente tocar; manter mudo aqui
+      // Quando este vídeo se torna ativo, pausar todos os outros primeiro
+      const allVideos = document.querySelectorAll('.video-player')
+      allVideos.forEach(v => {
+        const vidId = v.getAttribute('data-video-id')
+        if (vidId && vidId !== String(video.id)) {
+          v.pause()
+        }
+      })
+      
+      // Dar play neste vídeo
+      const playPromise = videoElement.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true)
+          })
+          .catch((error) => {
+            console.log('Erro ao dar play:', error)
+            setIsPlaying(false)
+          })
+      } else {
+        setIsPlaying(true)
       }
-      videoElement.play().catch(() => {})
-      setIsPlaying(true)
     } else {
+      // Quando este vídeo não está mais ativo, pausar imediatamente
       videoElement.pause()
       setIsPlaying(false)
     }
-  }, [isActive, isFirst, isMuted, video.id])
+  }, [isActive, video.id])
 
   const handleShareClick = () => {
     if (!currentUser) {
@@ -218,6 +303,33 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     } catch (error) {
       console.error("Erro ao compartilhar:", error)
       setAlertDialog({ open: true, title: 'Erro', message: 'Erro ao compartilhar vídeo' })
+    }
+  }
+
+  const handleFollow = async (e) => {
+    e.stopPropagation()
+    if (!currentUser) {
+      setAlertDialog({ open: true, title: 'Login necessário', message: 'Faça login para seguir usuários' })
+      return
+    }
+    
+    if (video.userId === currentUser.uid) return
+    
+    try {
+      if (isFollowingUser) {
+        await unfollowUser(video.userId, currentUser.uid)
+        setIsFollowingUser(false)
+        setIsFriend(false)
+      } else {
+        await followUser(video.userId, currentUser.uid)
+        setIsFollowingUser(true)
+        // Verificar se agora são amigos
+        const mutualFollow = await isFollowing(currentUser.uid, video.userId)
+        setIsFriend(mutualFollow)
+      }
+    } catch (error) {
+      console.error("Erro ao seguir/deixar de seguir:", error)
+      setAlertDialog({ open: true, title: 'Erro', message: 'Erro ao seguir usuário' })
     }
   }
 
@@ -320,6 +432,25 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
           <div className="video-details">
             <div className="video-header">
               <span className="video-username">@{video.username}</span>
+              {isFriend && (
+                <span className="video-friend-badge" title="Amigo">
+                  <md-icon>group</md-icon>
+                </span>
+              )}
+              {currentUser && video.userId && video.userId !== currentUser.uid && (
+                <button 
+                  className={`video-follow-button ${isFollowingUser ? 'following' : ''} ${isFriend ? 'friend' : ''}`}
+                  onClick={handleFollow}
+                >
+                  {isFriend ? (
+                    <md-icon>group</md-icon>
+                  ) : isFollowingUser ? (
+                    <md-icon>check</md-icon>
+                  ) : (
+                    <md-icon>person_add</md-icon>
+                  )}
+                </button>
+              )}
               <span className="video-time">{formatTime(video.timestamp)}</span>
             </div>
             <p className="video-description">{video.description}</p>
@@ -344,17 +475,18 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
         />
       )}
 
-      {alertDialog.open && (
-        <md-dialog open style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
-          <form slot="content" id={`video-alert-form-${video.id}`} method="dialog">
-            <h3 style={{ margin: 0 }}>{alertDialog.title}</h3>
-            <p style={{ marginTop: 8 }}>{alertDialog.message}</p>
-          </form>
-          <div slot="actions">
-            <md-text-button form={`video-alert-form-${video.id}`} value="ok" onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
-          </div>
-        </md-dialog>
-      )}
+      <md-dialog 
+        ref={alertDialogRef}
+        onClose={() => setAlertDialog({ open: false, title: '', message: '' })}
+      >
+        <div slot="headline">{alertDialog.title}</div>
+        <form slot="content" method="dialog">
+          <p>{alertDialog.message}</p>
+        </form>
+        <div slot="actions">
+          <md-text-button onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
+        </div>
+      </md-dialog>
     </div>
   )
 }

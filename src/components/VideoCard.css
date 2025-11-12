@@ -1,7 +1,7 @@
 .video-card {
   width: 100%;
-  height: calc(100vh - 64px - 64px);
-  min-height: calc(100vh - 64px - 64px);
+  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
   position: relative;
   background: var(--md-sys-color-background);
   overflow: visible;
@@ -11,12 +11,6 @@
   scroll-snap-stop: always;
   margin: 0;
   padding: 0;
-}
-
-/* Quando não há header */
-.App.no-header .video-card {
-  height: calc(100vh - 64px);
-  min-height: calc(100vh - 64px);
 }
 
 .video-container {
@@ -197,6 +191,19 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.video-friend-badge {
+  display: inline-flex;
+  align-items: center;
+  color: var(--md-sys-color-primary);
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+.video-friend-badge md-icon {
+  font-size: 18px;
 }
 
 .video-username {
@@ -221,11 +228,54 @@
   font-family: 'Google Sans', 'Google Sans Text', sans-serif;
   color: white;
   line-height: 1.6;
-  margin: 0;
+  margin: 0 0 8px 0;
   word-wrap: break-word;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
   max-width: 90%;
   letter-spacing: 0.01em;
+}
+
+.video-follow-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.video-follow-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.video-follow-button:active {
+  transform: scale(0.9);
+}
+
+.video-follow-button.following {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.video-follow-button.friend {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.video-follow-button md-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 .action-button {

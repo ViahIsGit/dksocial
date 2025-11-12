@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { auth, onAuthStateChanged } from '../firebase/config'
 import { getComments, addComment, likeComment, unlikeComment } from '../services/reels'
  
@@ -11,6 +11,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
   const [submitting, setSubmitting] = useState(false)
   const [user, setUser] = useState(currentUser)
   const [alertDialog, setAlertDialog] = useState({ open: false, title: '', message: '' })
+  const alertDialogRef = useRef(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
@@ -22,6 +23,17 @@ function CommentsModal({ reelId, onClose, currentUser }) {
   useEffect(() => {
     loadComments()
   }, [reelId])
+
+  // Controlar o md-dialog usando os métodos show() e close()
+  useEffect(() => {
+    if (alertDialogRef.current) {
+      if (alertDialog.open) {
+        alertDialogRef.current.show()
+      } else {
+        alertDialogRef.current.close()
+      }
+    }
+  }, [alertDialog.open])
 
   const loadComments = async () => {
     try {
@@ -181,17 +193,18 @@ function CommentsModal({ reelId, onClose, currentUser }) {
         )}
       </div>
 
-      {alertDialog.open && (
-        <md-dialog open style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
-          <form slot="content" id="comments-alert-form" method="dialog">
-            <h3 style={{ margin: 0 }}>{alertDialog.title}</h3>
-            <p style={{ marginTop: 8 }}>{alertDialog.message}</p>
-          </form>
-          <div slot="actions">
-            <md-text-button form="comments-alert-form" value="ok" onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
-          </div>
-        </md-dialog>
-      )}
+      <md-dialog 
+        ref={alertDialogRef}
+        onClose={() => setAlertDialog({ open: false, title: '', message: '' })}
+      >
+        <div slot="headline">{alertDialog.title}</div>
+        <form slot="content" method="dialog">
+          <p>{alertDialog.message}</p>
+        </form>
+        <div slot="actions">
+          <md-text-button onClick={() => setAlertDialog({ open: false, title: '', message: '' })}>Ok</md-text-button>
+        </div>
+      </md-dialog>
     </div>
   )
 }

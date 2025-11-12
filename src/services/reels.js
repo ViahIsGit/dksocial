@@ -170,15 +170,28 @@ export async function createReel({ videoFile, thumbnailFile, desc, onProgress })
     console.log("Salvando no Firestore...")
     // Normalizar URL para compatibilidade mobile (mp4/h264)
     const toMobileVideoUrl = (url) => {
+      if (!url) return url
       try {
         const u = new URL(url)
         if (u.hostname.includes('cloudinary') && u.pathname.includes('/upload/')) {
-          const parts = u.pathname.split('/upload/')
-          u.pathname = `${parts[0]}/upload/f_mp4,vc_h264,q_auto/${parts[1]}`
-          return u.toString()
+          // Verificar se já tem transformações
+          const pathParts = u.pathname.split('/upload/')
+          if (pathParts.length === 2) {
+            const afterUpload = pathParts[1]
+            // Se já tem transformações (contém vírgulas), usar como está
+            if (afterUpload.includes(',') || afterUpload.match(/^[a-z_]+/)) {
+              return url
+            }
+            // Não tem transformações, adicionar
+            u.pathname = `${pathParts[0]}/upload/f_mp4,vc_h264,q_auto/${afterUpload}`
+            return u.toString()
+          }
         }
-      } catch {}
-      return url
+        return url
+      } catch (error) {
+        console.error('Erro ao processar URL do vídeo:', error, url)
+        return url
+      }
     }
 
     // Salvar no Firestore
@@ -399,7 +412,13 @@ export async function followUser(followedUserId, currentUserId) {
     createdAt: serverTimestamp()
   }
   
+  // Salvar em duas coleções: quem está seguindo e quem está sendo seguido
   await setDoc(doc(db, 'followers', followedUserId, 'userFollowers', currentUserId), followData)
+  await setDoc(doc(db, 'followers', currentUserId, 'userFollowing', followedUserId), {
+    followedUserId: followedUserId,
+    followerId: currentUserId,
+    createdAt: serverTimestamp()
+  })
 }
 
 /**
@@ -409,6 +428,7 @@ export async function unfollowUser(followedUserId, currentUserId) {
   if (!currentUserId) throw new Error("Usuário não autenticado")
   
   await deleteDoc(doc(db, 'followers', followedUserId, 'userFollowers', currentUserId))
+  await deleteDoc(doc(db, 'followers', currentUserId, 'userFollowing', followedUserId))
 }
 
 /**

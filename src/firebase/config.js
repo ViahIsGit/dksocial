@@ -18,7 +18,8 @@ import {
   arrayRemove,
   increment,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js'
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js'
 
@@ -57,7 +58,8 @@ export {
   arrayRemove,
   increment,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 }
 
 export default app

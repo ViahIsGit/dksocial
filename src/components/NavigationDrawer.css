@@ -1,24 +1,18 @@
 .navigation-drawer {
   position: fixed;
   left: 0;
-  top: 64px;
-  height: calc(100vh - 64px);
+  top: 0;
+  height: 100vh;
   width: 256px;
   background: var(--md-sys-color-surface-container);
   border-right: 1px solid var(--md-sys-color-outline-variant);
   z-index: 999;
   transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), top 0.3s ease, height 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Quando não há header */
-.App.no-header .navigation-drawer {
-  top: 0;
-  height: 100vh;
 }
 
 .navigation-drawer.open {
@@ -27,7 +21,7 @@
 
 .drawer-backdrop {
   position: fixed;
-  top: 64px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
@@ -35,12 +29,6 @@
   z-index: 998;
   display: none;
   backdrop-filter: blur(2px);
-  transition: top 0.3s ease;
-}
-
-/* Quando não há header */
-.App.no-header .drawer-backdrop {
-  top: 0;
 }
 
 .drawer-backdrop.visible {
@@ -176,16 +164,10 @@
 @media (min-width: 960px) {
   .navigation-drawer {
     position: fixed;
-    top: 64px;
-    transform: translateX(0) !important;
-    height: calc(100vh - 64px);
-    box-shadow: none;
-  }
-
-  /* Quando não há header no desktop */
-  .App.no-header .navigation-drawer {
     top: 0;
+    transform: translateX(0) !important;
     height: 100vh;
+    box-shadow: none;
   }
 
   .drawer-close {

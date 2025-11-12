@@ -13,17 +13,13 @@
   flex: 1;
   display: flex;
   overflow: hidden;
-  margin-top: 64px;
+  margin-top: 0;
   margin-bottom: 0;
   position: relative;
-  transition: margin-left 0.3s ease, margin-top 0.3s ease;
+  transition: margin-left 0.3s ease;
   height: calc(100vh - 64px);
-}
-
-/* Quando não há header (feed ativo) */
-.App.no-header .app-main {
-  margin-top: 0;
-  height: 100vh;
+  height: calc(100dvh - 64px);
+  min-height: 0;
 }
 
 .App.no-header .navigation-drawer {
