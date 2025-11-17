@@ -1,0 +1,21 @@
+.splash-screen {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+
+  /* COR DO BACKGROUND (marrom da imagem) */
+  background: #4a2712;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  position: relative;
+}
+
+.splash-logo {
+  width: 200px; /* ajuste como quiser */
+  height: auto;
+  z-index: 2;
+}

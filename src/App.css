@@ -9,6 +9,26 @@
   position: relative;
 }
 
+.logout-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  background: var(--md-sys-color-surface-container-high, rgba(255, 255, 255, 0.1));
+  color: var(--md-sys-color-on-surface, #ffffff);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.logout-button:hover {
+  background: var(--md-sys-color-surface-container-highest, rgba(255, 255, 255, 0.2));
+  transform: translateY(-2px);
+}
+
 .app-main {
   flex: 1;
   display: flex;

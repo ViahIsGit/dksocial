@@ -1,5 +1,8 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js'
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js'
+import { initializeApp } from 'firebase/app'
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'firebase/auth'
 import {
   getFirestore,
   collection,
@@ -19,9 +22,9 @@ import {
   increment,
   serverTimestamp,
   Timestamp,
-  onSnapshot
-} from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js'
-import { getStorage } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js'
+  onSnapshot,
+} from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: "AIzaSyCyvYMhxJWXZdCB60MBrZFKeONnR4fXDcc",
