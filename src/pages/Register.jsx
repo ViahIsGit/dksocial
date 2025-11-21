@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth, db, doc, serverTimestamp, setDoc } from '../firebase/config'
 import './Register.css'
@@ -20,6 +21,7 @@ function getFriendlyError(code) {
 }
 
 export default function Register({ onShowLogin, onShowForgot }) {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -109,7 +111,7 @@ export default function Register({ onShowLogin, onShowForgot }) {
               <h2>Comece informando seus dados</h2>
               <p>Usaremos essas informações para personalizar sua experiência.</p>
             </div>
-            <button type="button" className="ghost-link" onClick={onShowLogin}>
+            <button type="button" className="ghost-link" onClick={() => navigate('/login')}>
               Já tenho conta
             </button>
           </header>
@@ -189,7 +191,7 @@ export default function Register({ onShowLogin, onShowForgot }) {
               {loading ? 'Criando...' : 'Criar conta'}
             </md-filled-button>
 
-            <button type="button" className="ghost-link" onClick={onShowForgot}>
+            <button type="button" className="ghost-link" onClick={() => navigate('/forgot-password')}>
               Precisa recuperar o acesso?
             </button>
           </form>

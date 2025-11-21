@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './ForgotPassword.css'
 
 export default function ForgotPassword({ onShowLogin, onShowRegister }) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('idle')
@@ -72,10 +74,10 @@ export default function ForgotPassword({ onShowLogin, onShowRegister }) {
         </form>
 
         <footer className="recover-footer">
-          <button type="button" className="ghost-link" onClick={onShowLogin}>
+          <button type="button" className="ghost-link" onClick={() => navigate('/login')}>
             Voltar para login
           </button>
-          <button type="button" className="ghost-link" onClick={onShowRegister}>
+          <button type="button" className="ghost-link" onClick={() => navigate('/register')}>
             Criar nova conta
           </button>
         </footer>

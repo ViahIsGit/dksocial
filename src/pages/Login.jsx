@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './Login.css'
@@ -18,6 +19,7 @@ function getFriendlyError(code) {
 }
 
 export default function Login({ onShowRegister, onShowForgot }) {
+  const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -121,7 +123,7 @@ export default function Login({ onShowRegister, onShowForgot }) {
           </md-filled-text-field>
 
           <div className="form-meta">
-            <button type="button" className="ghost-link" onClick={onShowForgot}>
+            <button type="button" className="ghost-link" onClick={() => navigate('/forgot-password')}>
               Esqueci minha senha
             </button>
           </div>
@@ -139,7 +141,7 @@ export default function Login({ onShowRegister, onShowForgot }) {
 
         <footer className="login-footer">
           <span>Ainda não tem conta?</span>
-          <button type="button" className="ghost-link" onClick={onShowRegister}>
+          <button type="button" className="ghost-link" onClick={() => navigate('/register')}>
             Criar nova conta
           </button>
         </footer>

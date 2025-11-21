@@ -1,21 +1,26 @@
 import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import './NavigationDrawer.css'
 
 function NavigationDrawer({ isOpen, onClose }) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [activeItem, setActiveItem] = useState('inbox')
 
   const menuItems = [
-    { id: 'feed', label: 'Feed', icon: 'dynamic_feed' },
-    { id: 'messages', label: 'Mensagens', icon: 'mail', badge: '5' },
+    { id: 'feed', label: 'Feed', icon: 'dynamic_feed', route: '/feed' },
+    { id: 'messages', label: 'Mensagens', icon: 'mail', badge: '5', route: '/messages' },
     { id: 'notifications', label: 'Notificações', icon: 'notifications', badge: '3' },
     { id: 'friends', label: 'Amigos', icon: 'group' },
-    { id: 'profile', label: 'Perfil', icon: 'person' },
-    { id: 'settings', label: 'Configurações', icon: 'settings' },
-    { id: 'logout', label: 'Sair', icon: 'logout' }
+    { id: 'profile', label: 'Perfil', icon: 'person', route: '/u' },
+    { id: 'settings', label: 'Configurações', icon: 'settings' }
   ]
 
-  const handleItemClick = (id) => {
+  const handleItemClick = (id, route) => {
     setActiveItem(id)
+    if (route) {
+      navigate(route)
+    }
     // Em mobile, fechar o drawer ao clicar
     if (window.innerWidth < 960) {
       onClose()
@@ -42,8 +47,8 @@ function NavigationDrawer({ isOpen, onClose }) {
           {menuItems.map((item) => (
             <div
               key={item.id}
-              className={`menu-item ${activeItem === item.id ? 'active' : ''}`}
-              onClick={() => handleItemClick(item.id)}
+              className={`menu-item ${location.pathname === item.route ? 'active' : ''}`}
+              onClick={() => handleItemClick(item.id, item.route)}
             >
               <md-icon className="menu-icon">{item.icon}</md-icon>
               <span className="menu-label">{item.label}</span>

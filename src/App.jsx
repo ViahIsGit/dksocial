@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import NavigationDrawer from './components/NavigationDrawer'
 import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
@@ -10,14 +11,17 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import PostSignup from './pages/PostSignup'
+import Profile from './components/Profile'
+import EditProfile from './components/EditProfile'
+import SettingsPage from './components/SettingsPage'
 import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
-import { signOut } from 'firebase/auth'
 import './App.css'
 
-function AppShell({ onLogout }) {
+function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('feed')
   const { chromeHidden } = useLayout()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const handleMenuClick = () => {
     setDrawerOpen(!drawerOpen)
@@ -28,35 +32,103 @@ function AppShell({ onLogout }) {
   }
 
   const handleTabChange = (tabId) => {
-    setActiveTab(tabId)
-    // Lógica para mudar de aba pode ser adicionada aqui
+    const routes = {
+      feed: '/feed',
+      messages: '/messages',
+      camera: '/camera',
+      profile: '/u'
+    }
+    if (routes[tabId]) {
+      navigate(routes[tabId])
+    }
   }
 
   const handleFABClick = () => {
-    setActiveTab('camera')
+    navigate('/camera')
+  }
+
+  const getActiveTab = () => {
+    const path = location.pathname
+    if (path === '/feed') return 'feed'
+    if (path === '/messages') return 'messages'
+    if (path === '/camera') return 'camera'
+    if (path.startsWith('/u')) return 'profile'
+    return 'feed'
   }
 
   return (
     <div className={`App ${drawerOpen ? 'drawer-open' : ''} no-header`}>
-      {onLogout && (
-        <button className="logout-button" type="button" onClick={onLogout}>
-          Sair
-        </button>
-      )}
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
       <div className="app-main">
-        {activeTab === 'feed' && <Feed />}
-        {activeTab === 'messages' && <Messages />}
-        {activeTab === 'camera' && <Camera />}
+        <Routes>
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/camera" element={<Camera />} />
+          <Route path="/u" element={<Profile onMenuClick={handleMenuClick} drawerOpen={drawerOpen} />} />
+          <Route path="/u/edit" element={<EditProfile />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<Navigate to="/feed" replace />} />
+        </Routes>
       </div>
       {!chromeHidden && (
-        <BottomNav 
-          activeTab={activeTab} 
+        <BottomNav
+          activeTab={getActiveTab()}
           onTabChange={handleTabChange}
           onFABClick={handleFABClick}
         />
       )}
     </div>
+  )
+}
+
+function ProtectedRoute({ children, profileStatus, profileData, onProfileUpdated, onLogout }) {
+  if (profileStatus === 'needs_setup') {
+    return (
+      <PostSignup
+        details={profileData}
+        onProfileUpdated={onProfileUpdated}
+        onLogout={onLogout}
+      />
+    )
+  }
+  if (profileStatus === 'checking') {
+    return <SplashScreen />
+  }
+  return children
+}
+
+function AuthRoutes({ authView, setAuthView }) {
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <Login
+            onShowRegister={() => setAuthView('register')}
+            onShowForgot={() => setAuthView('forgot')}
+          />
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <Register
+            onShowLogin={() => setAuthView('login')}
+            onShowForgot={() => setAuthView('forgot')}
+          />
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <ForgotPassword
+            onShowLogin={() => setAuthView('login')}
+            onShowRegister={() => setAuthView('register')}
+          />
+        }
+      />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   )
 }
 
@@ -103,7 +175,7 @@ export default function App() {
       console.error('Erro ao carregar perfil', error)
       setProfileStatus('error')
     }
-  }, [db])
+  }, [])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -123,58 +195,29 @@ export default function App() {
     return () => window.clearTimeout(timer)
   }, [])
 
-  const handleLogout = async () => {
-    await signOut(auth)
-  }
-
   const shouldShowSplash = !authReady || !splashDone
-
-  const renderAuthView = () => {
-    switch (authView) {
-      case 'register':
-        return (
-          <Register
-            onShowLogin={() => setAuthView('login')}
-            onShowForgot={() => setAuthView('forgot')}
-          />
-        )
-      case 'forgot':
-        return (
-          <ForgotPassword
-            onShowLogin={() => setAuthView('login')}
-            onShowRegister={() => setAuthView('register')}
-          />
-        )
-      default:
-        return (
-          <Login
-            onShowRegister={() => setAuthView('register')}
-            onShowForgot={() => setAuthView('forgot')}
-          />
-        )
-    }
-  }
 
   return (
     <LayoutProvider>
-      {shouldShowSplash ? (
-        <SplashScreen />
-      ) : user ? (
-        profileStatus === 'needs_setup' ? (
-          <PostSignup
-            details={profileData}
-            onProfileUpdated={() => loadProfileData(user)}
-            onLogout={handleLogout}
-          />
-        ) : profileStatus === 'checking' ? (
+      <BrowserRouter>
+        {shouldShowSplash ? (
           <SplashScreen />
+        ) : user ? (
+          <ProtectedRoute
+            profileStatus={profileStatus}
+            profileData={profileData}
+            onProfileUpdated={() => loadProfileData(user)}
+            onLogout={async () => {
+              const { signOut } = await import('firebase/auth')
+              await signOut(auth)
+            }}
+          >
+            <AppShell />
+          </ProtectedRoute>
         ) : (
-          <AppShell onLogout={handleLogout} />
-        )
-      ) : (
-        renderAuthView()
-      )}
+          <AuthRoutes authView={authView} setAuthView={setAuthView} />
+        )}
+      </BrowserRouter>
     </LayoutProvider>
   )
 }
-
