@@ -5,7 +5,10 @@ import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
 import Messages from './components/Messages'
 import Camera from './components/Camera'
+import MusicPage from './pages/MusicPage'
 import { LayoutProvider, useLayout } from './context/LayoutContext'
+import { MessagesProvider } from './context/MessagesContext'
+import { ThemeProvider } from './context/ThemeContext'
 import SplashScreen from './pages/SplashScreen'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -63,6 +66,7 @@ function AppShell() {
         <Routes>
           <Route path="/feed" element={<Feed />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/music/:id" element={<MusicPage />} />
           <Route path="/camera" element={<Camera />} />
           <Route path="/u" element={<Profile onMenuClick={handleMenuClick} drawerOpen={drawerOpen} />} />
           <Route path="/u/edit" element={<EditProfile />} />
@@ -199,25 +203,29 @@ export default function App() {
 
   return (
     <LayoutProvider>
-      <BrowserRouter>
-        {shouldShowSplash ? (
-          <SplashScreen />
-        ) : user ? (
-          <ProtectedRoute
-            profileStatus={profileStatus}
-            profileData={profileData}
-            onProfileUpdated={() => loadProfileData(user)}
-            onLogout={async () => {
-              const { signOut } = await import('firebase/auth')
-              await signOut(auth)
-            }}
-          >
-            <AppShell />
-          </ProtectedRoute>
-        ) : (
-          <AuthRoutes authView={authView} setAuthView={setAuthView} />
-        )}
-      </BrowserRouter>
+      <ThemeProvider>
+        <MessagesProvider>
+          <BrowserRouter>
+            {shouldShowSplash ? (
+              <SplashScreen />
+            ) : user ? (
+              <ProtectedRoute
+                profileStatus={profileStatus}
+                profileData={profileData}
+                onProfileUpdated={() => loadProfileData(user)}
+                onLogout={async () => {
+                  const { signOut } = await import('firebase/auth')
+                  await signOut(auth)
+                }}
+              >
+                <AppShell />
+              </ProtectedRoute>
+            ) : (
+              <AuthRoutes authView={authView} setAuthView={setAuthView} />
+            )}
+          </BrowserRouter>
+        </MessagesProvider>
+      </ThemeProvider>
     </LayoutProvider>
   )
 }

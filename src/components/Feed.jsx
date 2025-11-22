@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useLocation } from 'react-router-dom'
 import { auth, onAuthStateChanged } from '../firebase/config'
 import { fetchReels, incrementViews, getUserProfile } from '../services/reels'
 import VideoCard from './VideoCard'
@@ -27,12 +28,12 @@ function Feed() {
   // Função para buscar informações do usuário (com cache)
   const getUserInfo = useCallback(async (userId) => {
     if (!userId) return { username: 'Usuário Anônimo', avatar: '/feed/logo.png' }
-    
+
     // Verificar cache primeiro
     if (userProfilesCache.current[userId]) {
       return userProfilesCache.current[userId]
     }
-    
+
     try {
       const userProfile = await getUserProfile(userId)
       const userInfo = {
@@ -77,13 +78,13 @@ function Feed() {
     }
 
     const reelsToFormat = endIndex ? reels.slice(startIndex, endIndex) : reels.slice(startIndex)
-    
+
     // Buscar informações de todos os usuários em paralelo
     const formattedVideos = await Promise.all(
       reelsToFormat.map(async (reel) => {
         // Buscar informações atualizadas do usuário
         const userInfo = await getUserInfo(reel.userId)
-        
+
         return {
           id: reel.id,
           username: userInfo.username,
@@ -104,29 +105,50 @@ function Feed() {
         }
       })
     )
-    
+
     return formattedVideos
   }, [getUserInfo, currentUser])
+
+  const location = useLocation()
 
   const loadInitialVideos = useCallback(async () => {
     try {
       setLoading(true)
       // Carregar todos os reels de uma vez, mas exibir apenas os primeiros
       const allReels = await fetchReels()
+
+      // Check for deep link
+      const searchParams = new URLSearchParams(location.search)
+      const deepLinkReelId = searchParams.get('reelId')
+
+      if (deepLinkReelId) {
+        const reelIndex = allReels.findIndex(r => r.id === deepLinkReelId)
+        if (reelIndex > -1) {
+          // Move to front
+          const [reel] = allReels.splice(reelIndex, 1)
+          allReels.unshift(reel)
+        }
+      }
+
       allReelsRef.current = allReels
-      
+
       // Carregar apenas os primeiros 5 vídeos inicialmente
       const initialVideos = await formatVideos(allReels, 0, 5)
-      
+
       setVideos(initialVideos)
       setLastLoadedIndex(5)
       setHasMore(allReels.length > 5)
+
+      // If deep linked, set active immediately
+      if (deepLinkReelId) {
+        setActiveVideoId(deepLinkReelId)
+      }
     } catch (error) {
       console.error("Erro ao carregar vídeos:", error)
     } finally {
       setLoading(false)
     }
-  }, [formatVideos])
+  }, [formatVideos, location.search])
 
   useEffect(() => {
     loadInitialVideos()
@@ -163,10 +185,10 @@ function Feed() {
         const visible = entries
           .filter(e => e.isIntersecting && e.intersectionRatio >= 0.5)
           .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))
-        
+
         if (visible.length > 0) {
           const newActiveId = visible[0].target.getAttribute('data-video-id')
-          
+
           // Se mudou o vídeo ativo, pausar o anterior e ativar o novo
           if (newActiveId && newActiveId !== activeVideoId) {
             // Primeiro, pausar o vídeo anterior se existir
@@ -177,7 +199,7 @@ function Feed() {
                 previousVideo.currentTime = 0 // Resetar para o início
               }
             }
-            
+
             // Pausar todos os outros vídeos também
             const allVideos = document.querySelectorAll('.video-player')
             allVideos.forEach(video => {
@@ -187,7 +209,7 @@ function Feed() {
                 video.currentTime = 0 // Resetar para o início
               }
             })
-            
+
             // Ativar o novo vídeo (isso vai disparar o useEffect no VideoCard que vai dar play)
             setActiveVideoId(newActiveId)
           }
@@ -202,7 +224,7 @@ function Feed() {
           }
         }
       },
-      { 
+      {
         threshold: [0, 0.25, 0.5, 0.75, 1],
         rootMargin: '-10% 0px -10% 0px' // Considerar apenas a parte central da tela
       }
@@ -213,7 +235,7 @@ function Feed() {
     players.forEach(p => {
       if (p) videoObserver.observe(p)
     })
-    
+
     return () => {
       players.forEach(p => {
         if (p) videoObserver.unobserve(p)
@@ -238,14 +260,14 @@ function Feed() {
 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return
-    
+
     try {
       setLoading(true)
-      
+
       // Carregar mais 3 vídeos do array já carregado
       const nextIndex = lastLoadedIndex + 3
       const newVideos = await formatVideos(allReelsRef.current, lastLoadedIndex, nextIndex)
-      
+
       if (newVideos.length > 0) {
         setVideos(prev => [...prev, ...newVideos])
         setLastLoadedIndex(nextIndex)
@@ -259,7 +281,7 @@ function Feed() {
       setLoading(false)
     }
   }, [loading, hasMore, lastLoadedIndex, formatVideos])
-  
+
   // Observer para carregar próximo vídeo quando o usuário estiver próximo
   useEffect(() => {
     if (videos.length === 0 || !hasMore || loading) return
@@ -281,13 +303,13 @@ function Feed() {
 
     const videoCards = document.querySelectorAll('[data-video-index]')
     videoCards.forEach(card => observer.observe(card))
-    
+
     return () => {
       videoCards.forEach(card => observer.unobserve(card))
       observer.disconnect()
     }
   }, [videos.length, hasMore, loading, loadMore])
-  
+
   // Incrementar visualizações quando o vídeo aparece
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -300,18 +322,48 @@ function Feed() {
       },
       { threshold: 0.5 }
     )
-    
+
     const videoCards = document.querySelectorAll('[data-reel-id]')
     videoCards.forEach(card => observer.observe(card))
-    
+
     return () => {
       videoCards.forEach(card => observer.unobserve(card))
     }
   }, [videos])
 
+  const [activeTab, setActiveTab] = useState('foryou')
+
+  // Filtrar vídeos com base na aba ativa
+  const getFilteredVideos = () => {
+    if (activeTab === 'following') {
+      // Placeholder: por enquanto retorna todos, mas aqui entraria a lógica de filtrar por amigos
+      // Se tivéssemos uma lista de IDs de amigos, faríamos: videos.filter(v => friendsIds.includes(v.userId))
+      return videos
+    }
+    return videos
+  }
+
+  const displayedVideos = getFilteredVideos()
+
   if (loading && videos.length === 0) {
     return (
       <div className="feed-container">
+        <div className="feed-top-bar">
+          <div className="feed-tabs">
+            <button
+              className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
+              onClick={() => setActiveTab('following')}
+            >
+              Seguindo
+            </button>
+            <button
+              className={`feed-tab ${activeTab === 'foryou' ? 'active' : ''}`}
+              onClick={() => setActiveTab('foryou')}
+            >
+              Para você
+            </button>
+          </div>
+        </div>
         <div className="feed-content">
           <div className="loading-indicator">
             <md-linear-progress value="0.5" buffer="0.8"></md-linear-progress>
@@ -324,19 +376,36 @@ function Feed() {
 
   return (
     <div className="feed-container">
+      <div className="feed-top-bar">
+        <div className="feed-tabs">
+          <button
+            className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
+            onClick={() => setActiveTab('following')}
+          >
+            Seguindo
+          </button>
+          <button
+            className={`feed-tab ${activeTab === 'foryou' ? 'active' : ''}`}
+            onClick={() => setActiveTab('foryou')}
+          >
+            Para você
+          </button>
+        </div>
+      </div>
+
       <div className="feed-content">
-        {videos.map((video, idx) => (
+        {displayedVideos.map((video, idx) => (
           <div key={video.id} data-reel-id={video.reelId} data-video-index={idx}>
-            <VideoCard 
-              video={video} 
-              currentUser={currentUser} 
-              isFirst={idx === 0} 
+            <VideoCard
+              video={video}
+              currentUser={currentUser}
+              isFirst={idx === 0}
               isActive={activeVideoId === String(video.id)}
               onPlayRequest={handlePlayRequest}
             />
           </div>
         ))}
-        
+
         <div ref={loadMoreRef} className="load-more-trigger">
           {loading && (
             <div className="loading-indicator">
@@ -346,14 +415,14 @@ function Feed() {
           )}
         </div>
 
-        {!hasMore && videos.length > 0 && (
+        {!hasMore && displayedVideos.length > 0 && (
           <div className="end-of-feed">
             <md-icon>check_circle</md-icon>
             <span>Você viu todos os vídeos!</span>
           </div>
         )}
-        
-        {videos.length === 0 && !loading && (
+
+        {displayedVideos.length === 0 && !loading && (
           <div className="end-of-feed">
             <md-icon>video_library</md-icon>
             <span>Nenhum vídeo encontrado</span>

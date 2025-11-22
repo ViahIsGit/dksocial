@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLayout } from '../context/LayoutContext'
+import { useMessages } from '../context/MessagesContext'
 import { auth, onAuthStateChanged } from '../firebase/config'
-import { 
-  getFriends, 
-  getOrCreateConversation, 
-  sendMessage, 
-  subscribeToMessages, 
+import {
+  getFriends,
+  getOrCreateConversation,
+  sendMessage,
+  subscribeToMessages,
   markMessagesAsRead,
   getConversations,
   subscribeToConversations,
@@ -23,11 +25,13 @@ import EmojiPicker from './EmojiPicker'
 import './Messages.css'
 
 function Messages() {
+  const navigate = useNavigate()
   const { hideChrome, showChrome } = useLayout()
+  const { conversations } = useMessages()
   const [activeChatId, setActiveChatId] = useState(null)
   const [currentUser, setCurrentUser] = useState(null)
   const [friends, setFriends] = useState([])
-  const [conversations, setConversations] = useState([])
+  // const [conversations, setConversations] = useState([]) // Removed local state
   const [messages, setMessages] = useState([])
   const [messageText, setMessageText] = useState('')
   const [sending, setSending] = useState(false)
@@ -45,7 +49,7 @@ function Messages() {
   const messagesEndRef = useRef(null)
   const fileInputRef = useRef(null)
   const unsubscribeMessagesRef = useRef(null)
-  const unsubscribeConversationsRef = useRef(null)
+  // const unsubscribeConversationsRef = useRef(null) // Removed ref
   const menuRef = useRef(null)
   const nicknameDialogRef = useRef(null)
 
@@ -63,7 +67,7 @@ function Messages() {
         setFriends([])
         return
       }
-      
+
       try {
         const friendsList = await getFriends(currentUser.uid)
         setFriends(friendsList)
@@ -71,26 +75,18 @@ function Messages() {
         console.error("Erro ao carregar amigos:", error)
       }
     }
-    
+
     loadFriends()
   }, [currentUser])
 
-  // Escutar conversas em tempo real
+  // Escutar conversas em tempo real - Substituído pelo Context
   useEffect(() => {
-    if (!currentUser) {
-      if (unsubscribeConversationsRef.current) {
-        unsubscribeConversationsRef.current()
-        unsubscribeConversationsRef.current = null
-      }
-      return
-    }
+    if (!currentUser || conversations.length === 0) return
 
-    unsubscribeConversationsRef.current = subscribeToConversations(currentUser.uid, async (convs) => {
-      setConversations(convs)
-      
-      // Carregar nicknames de todas as conversas
+    // Carregar nicknames de todas as conversas
+    const loadNicknames = async () => {
       const nicknamesMap = {}
-      for (const conv of convs) {
+      for (const conv of conversations) {
         const otherUserId = conv.participants.find(id => id !== currentUser.uid)
         if (otherUserId) {
           try {
@@ -107,14 +103,10 @@ function Messages() {
         }
       }
       setConversationNicknames(nicknamesMap)
-    })
-
-    return () => {
-      if (unsubscribeConversationsRef.current) {
-        unsubscribeConversationsRef.current()
-      }
     }
-  }, [currentUser])
+
+    loadNicknames()
+  }, [currentUser, conversations])
 
   // Escutar mensagens quando uma conversa está ativa
   useEffect(() => {
@@ -185,10 +177,10 @@ function Messages() {
             const userProfile = await getUserProfile(otherUserId)
             const blocked = await isUserBlocked(currentUser.uid, otherUserId)
             const nickname = await getConversationNickname(activeChatId, currentUser.uid, otherUserId)
-            
+
             setIsBlocked(blocked)
             setCustomNickname(nickname)
-            
+
             setActiveFriend({
               id: otherUserId,
               username: userProfile?.username || 'Usuário',
@@ -236,7 +228,7 @@ function Messages() {
 
   const handleStartChat = async (friendId) => {
     if (!currentUser) return
-    
+
     try {
       const conversationId = await getOrCreateConversation(currentUser.uid, friendId)
       if (conversationId) {
@@ -284,7 +276,7 @@ function Messages() {
 
   const handleDeleteMessage = async (messageId) => {
     if (!activeChatId || !currentUser) return
-    
+
     try {
       await deleteMessage(activeChatId, messageId)
     } catch (error) {
@@ -319,7 +311,7 @@ function Messages() {
   // Obter nome de exibição de um usuário em uma conversa (com nickname se disponível)
   const getDisplayNameForConversation = (conversationId, userId, originalUsername) => {
     if (!conversationId || !userId || !currentUser) return originalUsername || 'Usuário'
-    
+
     const nickname = conversationNicknames[conversationId]?.[userId]
     return nickname || originalUsername || 'Usuário'
   }
@@ -330,7 +322,7 @@ function Messages() {
     const friend = friends.find(f => f.id === otherUserId)
     const originalUsername = friend?.username || conv.participantNames?.[otherUserId] || 'Usuário'
     const displayName = getDisplayNameForConversation(conv.id, otherUserId, originalUsername)
-    
+
     return {
       id: otherUserId,
       username: displayName,
@@ -352,7 +344,7 @@ function Messages() {
 
   const handleBlockUser = async () => {
     if (!activeFriend || !currentUser || !activeChatId) return
-    
+
     try {
       if (isBlocked) {
         await unblockUser(currentUser.uid, activeFriend.id)
@@ -369,12 +361,12 @@ function Messages() {
 
   const handleSaveNickname = async () => {
     if (!activeFriend || !currentUser || !activeChatId) return
-    
+
     try {
       const nickname = nicknameInput.trim() || null
       await setConversationNickname(activeChatId, currentUser.uid, activeFriend.id, nickname)
       setCustomNickname(nickname)
-      
+
       // Atualizar o estado de nicknames da conversa
       setConversationNicknames(prev => {
         const updated = { ...prev }
@@ -391,7 +383,7 @@ function Messages() {
         }
         return updated
       })
-      
+
       setShowNicknameDialog(false)
       setShowMenu(false)
     } catch (error) {
@@ -406,29 +398,29 @@ function Messages() {
   }
 
   // Combinar amigos e conversas
-  const displayList = conversations.length > 0 
+  const displayList = conversations.length > 0
     ? conversations.map(conv => {
-        const friend = getConversationDisplay(conv)
-        return {
-          ...friend,
-          conversationId: conv.id,
-          lastMessage: conv.lastMessage,
-          lastMessageTime: conv.lastMessageTime,
-          unreadCount: 0 // Pode ser implementado depois
-        }
-      }).filter(item => item)
-    : friends.map(friend => ({
+      const friend = getConversationDisplay(conv)
+      return {
         ...friend,
-        conversationId: null,
-        lastMessage: '',
-        lastMessageTime: 0
-      }))
+        conversationId: conv.id,
+        lastMessage: conv.lastMessage,
+        lastMessageTime: conv.lastMessageTime,
+        unreadCount: (currentUser && conv.unreadCounts?.[currentUser.uid]) || 0
+      }
+    }).filter(item => item)
+    : friends.map(friend => ({
+      ...friend,
+      conversationId: null,
+      lastMessage: '',
+      lastMessageTime: 0
+    }))
 
   // Filtrar por busca
   const filteredList = searchQuery.trim()
-    ? displayList.filter(item => 
-        item.username.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? displayList.filter(item =>
+      item.username.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : displayList
 
   const inConversation = !!activeChatId
@@ -449,8 +441,8 @@ function Messages() {
         <aside className="messages-sidebar">
           <div className="sidebar-header">
             <h2>Mensagens</h2>
-            <md-icon-button 
-              aria-label="Nova conversa" 
+            <md-icon-button
+              aria-label="Nova conversa"
               onClick={() => setShowUserSearch(true)}
             >
               <md-icon>edit</md-icon>
@@ -459,15 +451,15 @@ function Messages() {
 
           <div className="sidebar-search">
             <md-icon className="search-icon">search</md-icon>
-            <input 
-              type="text" 
-              placeholder="Buscar conversas" 
+            <input
+              type="text"
+              placeholder="Buscar conversas"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <md-icon-button 
-                className="search-clear" 
+              <md-icon-button
+                className="search-clear"
                 aria-label="Limpar"
                 onClick={() => setSearchQuery('')}
               >
@@ -489,8 +481,8 @@ function Messages() {
               filteredList.map((item) => {
                 const isActive = activeChatId === item.conversationId
                 return (
-                  <button 
-                    key={item.id || item.conversationId} 
+                  <button
+                    key={item.id || item.conversationId}
                     className={`conversation-item ${isActive ? 'active' : ''}`}
                     onClick={() => {
                       if (item.conversationId) {
@@ -532,8 +524,8 @@ function Messages() {
           <div className="chat-header">
             <div className="chat-peer">
               {inConversation && (
-                <md-icon-button 
-                  aria-label="Voltar" 
+                <md-icon-button
+                  aria-label="Voltar"
                   className="mobile-only"
                   onClick={() => setActiveChatId(null)}
                 >
@@ -557,7 +549,7 @@ function Messages() {
             </div>
             {inConversation && (
               <div className="chat-actions" ref={menuRef}>
-                <md-icon-button 
+                <md-icon-button
                   aria-label="Mais opções"
                   onClick={() => setShowMenu(!showMenu)}
                 >
@@ -565,7 +557,7 @@ function Messages() {
                 </md-icon-button>
                 {showMenu && (
                   <div className="chat-menu">
-                    <button 
+                    <button
                       className="menu-item"
                       onClick={() => {
                         setShowNicknameDialog(true)
@@ -575,7 +567,7 @@ function Messages() {
                       <md-icon>edit</md-icon>
                       <span>Alterar apelido</span>
                     </button>
-                    <button 
+                    <button
                       className="menu-item"
                       onClick={handleBlockUser}
                     >
@@ -590,20 +582,20 @@ function Messages() {
 
           <div className="chat-body">
             {!inConversation ? (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 height: '100%',
                 color: 'var(--md-sys-color-on-surface-variant)'
               }}>
                 <p>Selecione uma conversa para começar</p>
               </div>
             ) : messages.length === 0 ? (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 height: '100%',
                 color: 'var(--md-sys-color-on-surface-variant)'
               }}>
@@ -626,6 +618,22 @@ function Messages() {
                                 <img src={msg.mediaUrl} alt="Imagem" style={{ maxWidth: '100%', borderRadius: '12px', marginBottom: '4px' }} />
                               ) : msg.mediaType === 'video' ? (
                                 <video src={msg.mediaUrl} controls style={{ maxWidth: '100%', borderRadius: '12px', marginBottom: '4px' }} />
+                              ) : msg.mediaType === 'reel_share' ? (
+                                <div
+                                  className="shared-reel-bubble"
+                                  onClick={() => navigate(`/feed?reelId=${msg.reelId || (msg.mediaUrl.includes('reel=') ? msg.mediaUrl.split('reel=')[1] : '')}`)}
+                                  style={{ cursor: 'pointer', maxWidth: '200px' }}
+                                >
+                                  <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', aspectRatio: '9/16', marginBottom: '4px' }}>
+                                    <img src={msg.mediaUrl} alt="Vídeo compartilhado" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+                                      <md-icon style={{ color: 'white', fontSize: '32px' }}>play_circle</md-icon>
+                                    </div>
+                                  </div>
+                                  <div style={{ fontSize: '0.85rem', fontWeight: '500' }}>
+                                    {msg.text || 'Vídeo compartilhado'}
+                                  </div>
+                                </div>
                               ) : (
                                 <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', marginBottom: '4px' }}>
                                   📎 Arquivo
@@ -641,7 +649,7 @@ function Messages() {
                             )}
                           </span>
                           {isYou && (
-                            <md-icon-button 
+                            <md-icon-button
                               className="message-delete"
                               onClick={() => handleDeleteMessage(msg.id)}
                               style={{ position: 'absolute', top: '4px', right: '4px', opacity: 0.5 }}
@@ -668,7 +676,7 @@ function Messages() {
                 style={{ display: 'none' }}
                 onChange={handleFileSelect}
               />
-              <md-icon-button 
+              <md-icon-button
                 type="button"
                 aria-label="Abrir anexos"
                 onClick={() => fileInputRef.current?.click()}
@@ -676,23 +684,23 @@ function Messages() {
                 <md-icon>attach_file</md-icon>
               </md-icon-button>
               <div className="input-box">
-                <md-icon-button 
+                <md-icon-button
                   type="button"
                   className="emoji-button"
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 >
                   <md-icon>mood</md-icon>
                 </md-icon-button>
-                <input 
-                  type="text" 
-                  placeholder="Escreva uma mensagem" 
+                <input
+                  type="text"
+                  placeholder="Escreva uma mensagem"
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   disabled={sending}
                 />
               </div>
-              <md-icon-button 
-                type="submit" 
+              <md-icon-button
+                type="submit"
                 aria-label="Enviar"
                 disabled={!messageText.trim() || sending}
               >

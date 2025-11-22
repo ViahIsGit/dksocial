@@ -1,11 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLayout } from '../context/LayoutContext'
+import { useTheme } from '../context/ThemeContext'
 import './SettingsPage.css'
 
 export default function SettingsPage() {
     const navigate = useNavigate()
     const { hideChrome, showChrome } = useLayout()
+    const { wallpaper, setWallpaper, resetTheme } = useTheme()
+    const fileInputRef = useRef(null)
 
     useEffect(() => {
         hideChrome()
@@ -58,15 +61,63 @@ export default function SettingsPage() {
                         </div>
                         <md-icon>chevron_right</md-icon>
                     </div>
-                    <div className="settings-item">
-                        <div className="settings-item-icon">
-                            <md-icon>dark_mode</md-icon>
+                    <div className="settings-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '100%' }}>
+                            <div className="settings-item-icon">
+                                <md-icon>palette</md-icon>
+                            </div>
+                            <div className="settings-item-text">
+                                <span>Aparência</span>
+                                <p>Personalize o tema com um papel de parede</p>
+                            </div>
                         </div>
-                        <div className="settings-item-text">
-                            <span>Aparência</span>
-                            <p>Tema e cores</p>
+
+                        <div className="wallpaper-picker" style={{ width: '100%', marginTop: '8px' }}>
+                            {wallpaper && (
+                                <div style={{
+                                    width: '100%',
+                                    height: '150px',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    marginBottom: '12px',
+                                    position: 'relative'
+                                }}>
+                                    <img src={wallpaper} alt="Wallpaper" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <md-icon-button
+                                        style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.5)', color: 'white', borderRadius: '50%' }}
+                                        onClick={resetTheme}
+                                    >
+                                        <md-icon>delete</md-icon>
+                                    </md-icon-button>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    style={{ display: 'none' }}
+                                    onChange={(e) => {
+                                        if (e.target.files?.[0]) {
+                                            setWallpaper(e.target.files[0])
+                                        }
+                                    }}
+                                />
+                                <md-filled-button
+                                    onClick={() => fileInputRef.current.click()}
+                                    style={{ width: '100%' }}
+                                >
+                                    <md-icon slot="icon">upload</md-icon>
+                                    Escolher Papel de Parede
+                                </md-filled-button>
+                                {wallpaper && (
+                                    <md-text-button onClick={resetTheme}>
+                                        Resetar
+                                    </md-text-button>
+                                )}
+                            </div>
                         </div>
-                        <md-icon>chevron_right</md-icon>
                     </div>
                 </div>
 

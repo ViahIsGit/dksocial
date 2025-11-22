@@ -1,6 +1,7 @@
 .video-card {
   width: 100%;
   height: calc(100vh - 64px);
+  /* Keep full height minus bottom nav */
   min-height: calc(100vh - 64px);
   position: relative;
   background: var(--md-sys-color-background);
@@ -132,37 +133,15 @@
   transform: translate(-50%, -50%) scale(1.1);
 }
 
-.video-actions-right {
+.video-avatar-container {
   position: absolute;
   right: 16px;
-  bottom: 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  align-items: center;
+  bottom: 380px;
+  /* Position above actions */
   z-index: 20;
-  padding-bottom: calc(env(safe-area-inset-bottom));
-  padding-right: 4px;
-  overflow: visible;
-}
-
-.video-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 80px;
-  padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.6), transparent);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  z-index: 10;
-}
-
-.video-main-info {
-  display: flex;
-  gap: 12px;
+  align-items: center;
 }
 
 .video-avatar {
@@ -170,9 +149,11 @@
   height: 48px;
   border-radius: 50%;
   overflow: hidden;
-  flex-shrink: 0;
-  border: 2px solid var(--md-sys-color-primary);
+  border: 2px solid white;
   background: var(--md-sys-color-surface-container);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .video-avatar img {
@@ -181,9 +162,108 @@
   object-fit: cover;
 }
 
-.video-details {
-  flex: 1;
-  min-width: 0;
+.video-follow-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff3b5c;
+  /* Standard follow color */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 0;
+}
+
+.video-follow-badge md-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.video-follow-badge.following {
+  background: transparent;
+  color: transparent;
+  box-shadow: none;
+  display: none;
+  /* Hide if following */
+}
+
+.video-actions-right {
+  position: absolute;
+  right: 16px;
+  bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  z-index: 20;
+  padding-bottom: calc(env(safe-area-inset-bottom));
+  padding-right: 4px;
+  overflow: visible;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+  min-width: auto;
+  min-height: auto;
+  background: transparent;
+  justify-content: center;
+  overflow: visible;
+}
+
+.action-button md-icon {
+  font-size: 32px;
+  color: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  width: 32px;
+  height: 32px;
+}
+
+.action-button span {
+  font-size: 0.75rem;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.video-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 80px;
+  padding: 16px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  /* More padding for bottom nav */
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+  pointer-events: none;
+  /* Allow clicks to pass through transparent parts */
+}
+
+.video-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
 }
 
 .video-header {
@@ -191,381 +271,90 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
-  flex-wrap: wrap;
-}
-
-.video-friend-badge {
-  display: inline-flex;
-  align-items: center;
-  color: var(--md-sys-color-primary);
-  font-size: 16px;
-  margin-left: 4px;
-}
-
-.video-friend-badge md-icon {
-  font-size: 18px;
 }
 
 .video-username {
   font-weight: 700;
   font-family: 'Google Sans', 'Google Sans Text', sans-serif;
   color: white;
-  font-size: 1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-  letter-spacing: -0.01em;
-}
-
-.video-time {
-  font-size: 0.8125rem;
-  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  letter-spacing: 0.01em;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .video-description {
-  font-size: 0.9375rem;
+  font-size: 0.95rem;
   font-family: 'Google Sans', 'Google Sans Text', sans-serif;
-  color: white;
-  line-height: 1.6;
-  margin: 0 0 8px 0;
-  word-wrap: break-word;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-  max-width: 90%;
-  letter-spacing: 0.01em;
-}
-
-.video-follow-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
   margin: 0;
-  flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  max-width: 90%;
 }
 
-.video-follow-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
-.video-follow-button:active {
-  transform: scale(0.9);
-}
-
-.video-follow-button.following {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.video-follow-button.friend {
-  background: var(--md-sys-color-primary);
-  border-color: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-}
-
-.video-follow-button md-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-.action-button {
+.video-music {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 4px;
-  transition: transform 0.2s ease;
-  min-width: 48px;
-  min-height: 56px;
-  background: transparent;
-  justify-content: center;
-  overflow: visible;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.action-button:hover {
-  transform: scale(1.1);
-}
-
-.action-button:active {
-  transform: scale(0.95);
-}
-
-.action-button.liked:active {
-  transform: scale(1.1);
-}
-
-.action-button.favorited:active {
-  transform: scale(1.1);
-}
-
-.action-button md-icon {
-  font-size: 32px;
+.video-music md-icon {
+  font-size: 16px;
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: visible;
+  width: 16px;
+  height: 16px;
 }
 
-/* Like ativo - coração vermelho */
-.action-button.liked md-icon.liked {
-  color: #ff1744 !important;
-  font-size: 38px;
-  width: 38px;
-  height: 38px;
-  filter: drop-shadow(0 2px 8px rgba(255, 23, 68, 0.6));
+.music-ticker-container {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 150px;
+  /* Fixed width for ticker */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
-.action-button.liked {
-  transform: scale(1.15);
+.music-ticker-text {
+  display: inline-block;
+  color: white;
+  font-size: 0.9rem;
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  animation: ticker 10s linear infinite;
+  padding-left: 100%;
+  /* Start from outside */
 }
 
-.action-button.liked:hover {
-  transform: scale(1.25);
-}
-
-.action-button.liked md-icon {
-  color: #ff1744 !important;
-  font-size: 38px;
-  width: 38px;
-  height: 38px;
-}
-
-/* Favorite ativo - amarelo */
-.action-button.favorited md-icon.favorited {
-  color: #ffc107 !important;
-  font-size: 38px;
-  width: 38px;
-  height: 38px;
-  filter: drop-shadow(0 2px 8px rgba(255, 193, 7, 0.6));
-}
-
-.action-button.favorited {
-  transform: scale(1.15);
-}
-
-.action-button.favorited:hover {
-  transform: scale(1.25);
-}
-
-.action-button.favorited md-icon {
-  color: #ffc107 !important;
-  font-size: 38px;
-  width: 38px;
-  height: 38px;
-}
-
-.action-button-share {
-  position: relative;
-}
-
-.share-menu {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  margin-bottom: 8px;
-  background: var(--md-sys-color-surface-container-highest);
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  min-width: 160px;
-  z-index: 100;
-  animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  100% {
+    transform: translateX(-200%);
   }
 }
 
-.share-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  background: transparent;
-  border: none;
-  color: var(--md-sys-color-on-surface);
-  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-  text-align: left;
-  letter-spacing: 0.01em;
-}
-
-.share-menu-item:hover {
-  background: var(--md-sys-color-surface-container-high);
-}
-
-.share-menu-item md-icon {
-  font-size: 20px;
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.share-menu-item span {
-  flex: 1;
-}
-
-.action-button span {
-  font-size: 0.75rem;
-  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
-  color: white;
-  font-weight: 700;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
-  line-height: 1.2;
-  letter-spacing: 0.01em;
-}
-
-/* Tablet */
-@media (min-width: 768px) and (max-width: 959px) {
-  .video-card {
-    height: calc(100vh - 64px - 72px);
-    min-height: calc(100vh - 64px - 72px);
+/* Adjustments for Tablet/Desktop */
+@media (min-width: 768px) {
+  .video-avatar-container {
+    right: 20px;
+    bottom: 400px;
   }
 
   .video-actions-right {
     right: 20px;
-    bottom: 100px;
-    gap: 28px;
-    padding-right: 4px;
-  }
-
-  .video-info {
-    padding: 24px;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
-    right: 100px;
-  }
-
-  .video-avatar {
-    width: 56px;
-    height: 56px;
-  }
-
-  .video-description {
-    font-size: 1.0625rem;
-    max-width: 85%;
-  }
-
-  .action-button {
-    min-width: 56px;
-    min-height: 64px;
-    padding: 4px;
-  }
-
-  .action-button md-icon {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
-  }
-
-  /* Like ativo - tablet */
-  .action-button.liked md-icon.liked,
-  .action-button.liked md-icon {
-    font-size: 42px;
-    width: 42px;
-    height: 42px;
-    color: #ff1744 !important;
-  }
-
-  /* Favorite ativo - tablet */
-  .action-button.favorited md-icon.favorited,
-  .action-button.favorited md-icon {
-    font-size: 42px;
-    width: 42px;
-    height: 42px;
-    color: #ffc107 !important;
-  }
-
-  .action-button span {
-    font-size: 0.8125rem;
+    bottom: 120px;
   }
 }
 
-/* Desktop */
 @media (min-width: 960px) {
-  .video-card {
-    height: calc(100vh - 64px);
-    min-height: calc(100vh - 64px);
+  .video-avatar-container {
+    right: 24px;
+    bottom: 420px;
   }
 
   .video-actions-right {
     right: 24px;
-    bottom: 100px;
-    gap: 32px;
-    padding-right: 4px;
-  }
-
-  .video-info {
-    padding: 24px;
-    right: 120px;
-  }
-
-  .video-avatar {
-    width: 56px;
-    height: 56px;
-  }
-
-  .video-description {
-    font-size: 1.0625rem;
-    max-width: 85%;
-  }
-
-  .action-button {
-    min-width: 56px;
-    min-height: 64px;
-    padding: 4px;
-  }
-
-  .action-button md-icon {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
-  }
-
-  /* Like ativo - tablet */
-  .action-button.liked md-icon.liked,
-  .action-button.liked md-icon {
-    font-size: 42px;
-    width: 42px;
-    height: 42px;
-    color: #ff1744 !important;
-  }
-
-  /* Favorite ativo - tablet */
-  .action-button.favorited md-icon.favorited,
-  .action-button.favorited md-icon {
-    font-size: 42px;
-    width: 42px;
-    height: 42px;
-    color: #ffc107 !important;
-  }
-
-  .action-button span {
-    font-size: 0.8125rem;
+    bottom: 140px;
   }
 }

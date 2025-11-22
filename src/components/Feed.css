@@ -83,7 +83,7 @@
   .feed-container {
     height: calc(100vh - 72px);
   }
-  
+
   .feed-content {
     max-width: 100%;
   }
@@ -104,3 +104,69 @@
   }
 }
 
+.feed-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+  padding-top: env(safe-area-inset-top);
+  pointer-events: none;
+  /* Allow clicks to pass through gradient area */
+}
+
+.feed-tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  pointer-events: auto;
+  /* Re-enable clicks for tabs */
+}
+
+.feed-tab {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Google Sans', 'Google Sans Text', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 4px;
+  position: relative;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.feed-tab.active {
+  color: white;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.feed-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Desktop adjustments */
+@media (min-width: 960px) {
+  .feed-top-bar {
+    max-width: 600px;
+    margin: 0 auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
