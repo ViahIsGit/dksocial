@@ -1,9 +1,29 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "hosting": {
+    "cleanUrls": true,
+    "ignore": [
+      "**/*.mp3",
+      "**/*.wav",
+      "**/*.ogg",
+      "**/*.mp4",
+      "**/*.webm",
+      "**/*.mov",
+      "**/*.avi",
+      "**/*.mkv",
+      "**/*.jpg",
+      "**/*.jpeg",
+      "**/*.png",
+      "**/*.gif",
+      "**/*.svg",
+      "**/*.webp",
+      "**/*.ico"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
 }
 
