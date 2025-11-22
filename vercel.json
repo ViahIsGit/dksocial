@@ -1,29 +1,14 @@
 {
-  "hosting": {
-    "cleanUrls": true,
-    "ignore": [
-      "**/*.mp3",
-      "**/*.wav",
-      "**/*.ogg",
-      "**/*.mp4",
-      "**/*.webm",
-      "**/*.mov",
-      "**/*.avi",
-      "**/*.mkv",
-      "**/*.jpg",
-      "**/*.jpeg",
-      "**/*.png",
-      "**/*.gif",
-      "**/*.svg",
-      "**/*.webp",
-      "**/*.ico"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
+  "routes": [
+    {
+      "src": "/.*\\.(png|jpe?g|gif|webp|svg|ico|mp4|webm|mov|avi|mkv|mp3|wav|ogg|flac|pdf|zip|rar|7z|tar|gz)$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
+
 
