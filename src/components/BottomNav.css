@@ -1,15 +1,19 @@
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
   z-index: 1000;
-  background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container-high);
   border-top: none;
-  height: 68px;
-  padding-bottom: env(safe-area-inset-bottom);
+  height: 64px;
+  padding-bottom: 0;
   display: flex;
   justify-content: center;
+  border-radius: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .bottom-nav-items {
@@ -22,20 +26,7 @@
   position: relative;
 }
 
-.bottom-nav-fab-container {
-  position: fixed;
-  bottom: 100px;
-  right: 16px;
-  z-index: 1001;
-  pointer-events: auto;
-}
-
-.bottom-nav-fab {
-  --md-fab-container-color: var(--md-sys-color-primary-container);
-  --md-fab-icon-color: var(--md-sys-color-on-primary-container);
-  position: relative;
-}
-
+/* FAB styles removed */
 .bottom-nav-item {
   flex: 1;
   display: flex;
@@ -91,7 +82,7 @@
 }
 
 .bottom-nav-item.active .bottom-nav-icon {
-  color: var(--md-sys-color-on-surface);
+  color: #ffffff;
   /* Changed to on-surface for better visibility if on-secondary-container is failing */
 }
 

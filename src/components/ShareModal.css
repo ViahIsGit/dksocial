@@ -14,14 +14,21 @@
 
 .share-modal {
   background: var(--md-sys-color-surface-container);
-  width: 100%;
-  max-width: 600px;
-  border-radius: 28px 28px 0 0;
-  padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  width: 90%;
+  max-width: 400px;
+  border-radius: 28px;
+  padding: 24px;
+  padding-bottom: 24px;
   animation: slideUp 0.3s cubic-bezier(0.2, 0, 0, 1);
-  position: relative;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   overflow: hidden;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes slideUp {
@@ -65,9 +72,11 @@
 
 .share-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px 16px;
+  margin-bottom: 24px;
+  overflow-y: auto;
+  padding: 4px;
 }
 
 .share-option-item {
@@ -82,23 +91,25 @@
 }
 
 .share-option-icon {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: var(--md-sys-color-surface-container-high);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--md-sys-color-on-surface);
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .share-option-item:hover .share-option-icon {
   background: var(--md-sys-color-surface-container-highest);
+  transform: scale(1.05);
 }
 
 .share-option-icon md-icon {
-  font-size: 24px;
+  font-size: 28px;
 }
 
 .share-option-label {
@@ -126,7 +137,7 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  border-radius: 28px 28px 0 0;
+  border-radius: 28px;
 }
 
 .share-user-header {

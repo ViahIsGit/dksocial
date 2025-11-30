@@ -1,15 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel, followUser, unfollowUser, isFollowing } from '../services/reels'
+import { useLayout } from '../context/LayoutContext'
 import CommentsModal from './CommentsModal'
 import ShareModal from './ShareModal'
 import './VideoCard.css'
 
 function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPlayRequest }) {
   const navigate = useNavigate()
+  const { setBottomNavHidden } = useLayout()
   const [isLiked, setIsLiked] = useState(video.isLiked || false)
   const [isFavorited, setIsFavorited] = useState(video.isFavorited || false)
-  const [isPlaying, setIsPlaying] = useState(!isFirst)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(isFirst ? true : false)
   const videoRef = useRef(null)
   const [likes, setLikes] = useState(video.likes || 0)
@@ -21,6 +23,19 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   const [isFollowingUser, setIsFollowingUser] = useState(false)
   const [isFriend, setIsFriend] = useState(false)
 
+  // Custom Player State
+  const [progress, setProgress] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [isBuffering, setIsBuffering] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState(1)
+  const [showControls, setShowControls] = useState(false)
+
+  // Slideshow State
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const isSlideshow = video.type === 'slideshow' || (video.mediaUrls && video.mediaUrls.length > 1)
+  const slides = video.mediaUrls || [video.videoUrl]
+
   useEffect(() => {
     setIsLiked(video.isLiked || false)
     setIsFavorited(video.isFavorited || false)
@@ -28,7 +43,125 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     setShares(video.shares || 0)
   }, [video])
 
-  // Verificar se está seguindo o usuário e se são amigos
+  // Video Event Handlers
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const current = videoRef.current.currentTime
+      const total = videoRef.current.duration || 1
+      setCurrentTime(current)
+      setProgress((current / total) * 100)
+    }
+  }
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration)
+    }
+  }
+
+  const handleWaiting = () => setIsBuffering(true)
+  const handleCanPlay = () => setIsBuffering(false)
+
+  const handleEnded = () => {
+    setIsPlaying(true)
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => { })
+    }
+  }
+
+  const handlePlay = () => {
+    setIsPlaying(true)
+    if (onPlayRequest) onPlayRequest(String(video.id))
+  }
+
+  const handlePause = () => setIsPlaying(false)
+
+  // Toggle Play/Pause
+  const togglePlay = useCallback(() => {
+    if (!videoRef.current) return
+
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(err => console.log('Play error:', err))
+    } else {
+      videoRef.current.pause()
+    }
+  }, [])
+
+  // Seek Handler
+  const handleSeek = (e) => {
+    const newProgress = parseFloat(e.target.value)
+    if (videoRef.current && duration) {
+      const newTime = (newProgress / 100) * duration
+      videoRef.current.currentTime = newTime
+      setProgress(newProgress)
+      setCurrentTime(newTime)
+    }
+  }
+
+  // Speed Control
+  const toggleSpeed = (e) => {
+    e.stopPropagation()
+    const speeds = [1, 1.5, 2, 0.5]
+    const nextSpeedIndex = speeds.indexOf(playbackRate) + 1
+    const nextSpeed = speeds[nextSpeedIndex % speeds.length]
+    setPlaybackRate(nextSpeed)
+    if (videoRef.current) {
+      videoRef.current.playbackRate = nextSpeed
+    }
+  }
+
+  // Handle Active State
+  useEffect(() => {
+    if (isActive) {
+      if (!isSlideshow && videoRef.current) {
+        const playPromise = videoRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.log('Autoplay prevented:', err)
+            setIsPlaying(false)
+          })
+        }
+      } else if (isSlideshow) {
+        setIsPlaying(true)
+      }
+    } else {
+      if (!isSlideshow && videoRef.current) {
+        videoRef.current.pause()
+        videoRef.current.currentTime = 0
+      }
+      setIsPlaying(false)
+    }
+  }, [isActive, isSlideshow])
+
+  // Slideshow Auto-play
+  useEffect(() => {
+    let interval
+    if (isSlideshow && isPlaying && !isBuffering) {
+      interval = setInterval(() => {
+        setCurrentSlide(prev => (prev + 1) % slides.length)
+      }, 3000)
+    }
+    return () => clearInterval(interval)
+  }, [isSlideshow, isPlaying, isBuffering, slides.length])
+
+  const handleSlideNav = (direction, e) => {
+    e.stopPropagation()
+    if (direction === 'next') {
+      setCurrentSlide(prev => (prev + 1) % slides.length)
+    } else {
+      setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)
+    }
+  }
+
+  // Mute Control
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted
+    }
+  }, [isMuted])
+
+
+  // Follow Status
   useEffect(() => {
     const checkFollowStatus = async () => {
       if (!currentUser || !video.userId || video.userId === currentUser.uid) return
@@ -37,7 +170,6 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
         const following = await isFollowing(video.userId, currentUser.uid)
         setIsFollowingUser(following)
 
-        // Verificar se são amigos (follow mútuo)
         if (following) {
           const mutualFollow = await isFollowing(currentUser.uid, video.userId)
           setIsFriend(mutualFollow)
@@ -52,7 +184,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     checkFollowStatus()
   }, [currentUser, video.userId])
 
-  // Controlar o md-dialog usando os métodos show() e close()
+  // Dialog Control
   useEffect(() => {
     if (alertDialogRef.current) {
       if (alertDialog.open) {
@@ -63,7 +195,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     }
   }, [alertDialog.open])
 
-  // Função para dar like (pode ser chamada pelo botão ou double tap)
+  // Like Logic
   const performLike = useCallback(async () => {
     if (!currentUser) {
       setAlertDialog({ open: true, title: 'Login necessário', message: 'Faça login para curtir vídeos' })
@@ -112,55 +244,12 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     }
   }
 
-  const handlePlay = () => {
-    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
-    if (videoElement) {
-      if (isPlaying) {
-        // Pausar este vídeo
-        videoElement.pause()
-        setIsPlaying(false)
-      } else {
-        // Pausar todos os outros vídeos antes de dar play neste
-        const allVideos = document.querySelectorAll('.video-player')
-        allVideos.forEach(v => {
-          if (v.getAttribute('data-video-id') !== String(video.id)) {
-            v.pause()
-          }
-        })
-
-        // Desmutar se necessário
-        if (isFirst && isMuted) {
-          videoElement.muted = false
-          setIsMuted(false)
-        }
-
-        // Dar play neste vídeo
-        videoElement.play()
-          .then(() => {
-            setIsPlaying(true)
-            if (onPlayRequest) onPlayRequest(String(video.id))
-          })
-          .catch(console.error)
-      }
-    } else {
-      setIsPlaying(!isPlaying)
-    }
-  }
-
   const handleToggleMute = (e) => {
     e.stopPropagation()
-    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`)
-    if (!videoElement) return
-    const nextMuted = !isMuted
-    videoElement.muted = nextMuted
-    setIsMuted(nextMuted)
-    if (!nextMuted) {
-      // Garantir play com som após gesto do usuário
-      videoElement.play().catch(() => { })
-    }
+    setIsMuted(prev => !prev)
   }
 
-  // Double tap/click para dar like
+  // Gestures
   const lastTapRef = useRef(0)
   const tapTimeoutRef = useRef(null)
 
@@ -168,10 +257,10 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     const container = document.querySelector(`[data-video-card-id="${video.id}"]`)
     if (!container) return
 
-    // Double tap para mobile
     const handleTouchStart = (e) => {
-      // Não interferir em toques nos botões de ação
-      if (e.target.closest('.video-actions-right')) {
+      if (e.target.closest('.video-actions-right') ||
+        e.target.closest('.video-info') ||
+        e.target.closest('.video-controls-container')) {
         return
       }
 
@@ -193,14 +282,17 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
         }
         tapTimeoutRef.current = setTimeout(() => {
           lastTapRef.current = 0
+          if (!e.defaultPrevented) {
+            togglePlay()
+          }
         }, 400)
       }
     }
 
-    // Double click para desktop
     const handleDoubleClick = (e) => {
-      // Não interferir em cliques nos botões de ação
-      if (e.target.closest('.video-actions-right')) {
+      if (e.target.closest('.video-actions-right') ||
+        e.target.closest('.video-info') ||
+        e.target.closest('.video-controls-container')) {
         return
       }
       e.preventDefault()
@@ -208,96 +300,35 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
       performLike()
     }
 
+    const handleClick = (e) => {
+      if (e.target.closest('.video-actions-right') ||
+        e.target.closest('.video-info') ||
+        e.target.closest('.video-controls-container')) {
+        return
+      }
+      togglePlay()
+    }
+
     container.addEventListener('touchstart', handleTouchStart, { passive: false })
     container.addEventListener('dblclick', handleDoubleClick)
+    container.addEventListener('click', handleClick)
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
       container.removeEventListener('dblclick', handleDoubleClick)
+      container.removeEventListener('click', handleClick)
       if (tapTimeoutRef.current) {
         clearTimeout(tapTimeoutRef.current)
       }
     }
-  }, [video.id, performLike])
-
-  useEffect(() => {
-    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
-    if (videoElement) {
-      // Forçar atributos para autoplay inline e mudo por padrão (desbloqueia autoplay em mobile)
-      videoElement.setAttribute('playsinline', '')
-      videoElement.muted = isMuted
-
-      // Verificar se a URL do vídeo é válida
-      if (video.videoUrl) {
-        videoElement.src = video.videoUrl
-        // Adicionar listener para erros de carregamento
-        const handleError = (e) => {
-          console.error('Erro ao carregar vídeo:', e, video.videoUrl)
-          // Tentar usar a URL original sem transformações se houver erro
-          if (video.videoUrl.includes('cloudinary') && video.videoUrl.includes(',')) {
-            const originalUrl = video.videoUrl.replace(/\/upload\/[^/]+\//, '/upload/')
-            videoElement.src = originalUrl
-          }
-        }
-        videoElement.addEventListener('error', handleError)
-
-        // Não dar autoplay aqui - será controlado pelo isActive
-        videoElement.addEventListener('ended', () => {
-          setIsPlaying(false)
-        })
-
-        return () => {
-          videoElement.removeEventListener('ended', () => { })
-          videoElement.removeEventListener('error', handleError)
-        }
-      }
-    }
-  }, [video.id, video.videoUrl, isMuted])
-
-  // Reagir à ativação/desativação vinda do Feed
-  useEffect(() => {
-    const videoElement = videoRef.current || document.querySelector(`[data-video-id="${video.id}"]`)
-    if (!videoElement) return
-
-    if (isActive) {
-      // Quando este vídeo se torna ativo, pausar todos os outros primeiro
-      const allVideos = document.querySelectorAll('.video-player')
-      allVideos.forEach(v => {
-        const vidId = v.getAttribute('data-video-id')
-        if (vidId && vidId !== String(video.id)) {
-          v.pause()
-        }
-      })
-
-      // Dar play neste vídeo
-      const playPromise = videoElement.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true)
-          })
-          .catch((error) => {
-            // Ignorar AbortError, pois é esperado quando o usuário rola rápido
-            if (error.name !== 'AbortError') {
-              console.log('Erro ao dar play:', error)
-            }
-            setIsPlaying(false)
-          })
-      } else {
-        setIsPlaying(true)
-      }
-    } else {
-      // Quando este vídeo não está mais ativo, pausar imediatamente
-      videoElement.pause()
-      setIsPlaying(false)
-    }
-  }, [isActive, video.id])
+  }, [video.id, performLike, togglePlay])
 
   const handleShareClick = () => {
     if (!currentUser) {
       setAlertDialog({ open: true, title: 'Login necessário', message: 'Faça login para compartilhar vídeos' })
       return
     }
+    setBottomNavHidden(true)
     setShowShareModal(true)
   }
 
@@ -328,7 +359,6 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
       } else {
         await followUser(video.userId, currentUser.uid)
         setIsFollowingUser(true)
-        // Verificar se agora são amigos
         const mutualFollow = await isFollowing(currentUser.uid, video.userId)
         setIsFriend(mutualFollow)
       }
@@ -357,49 +387,118 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     return `${days}d`
   }
 
+  const formatDuration = (seconds) => {
+    if (!seconds) return '0:00'
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   return (
     <div className="video-card" data-video-card-id={video.id}>
       <div className="video-container">
-        <video
-          className="video-player"
-          data-video-id={video.id}
-          ref={videoRef}
-          src={video.videoUrl}
-          poster={video.thumbnail}
-          preload="metadata"
-          crossOrigin="anonymous"
-          loop
-          playsInline
-          muted={isMuted}
-          autoPlay
-          onClick={handlePlay}
-          style={{ display: isPlaying ? 'block' : 'none' }}
-        />
-        <div
-          className="video-thumbnail"
-          style={{
-            backgroundImage: `url(${video.thumbnail || video.videoUrl})`,
-            display: isPlaying ? 'none' : 'block'
-          }}
-          onClick={handlePlay}
-        >
-          {!isPlaying && (
-            <div className="play-button" onClick={(e) => { e.stopPropagation(); handlePlay(); }}>
-              <md-icon>play_circle</md-icon>
-            </div>
-          )}
-          {isPlaying && (
-            <div className="pause-overlay" onClick={handlePlay}>
-              <md-icon>pause_circle</md-icon>
-            </div>
-          )}
-          {/* Botão de som */}
-          <div className="mute-toggle" onClick={handleToggleMute}>
-            <md-icon>{isMuted ? 'volume_off' : 'volume_up'}</md-icon>
-          </div>
-        </div>
+        {!isSlideshow ? (
+          <>
+            <video
+              ref={videoRef}
+              className="custom-video-player"
+              src={video.videoUrl}
+              poster={video.thumbnail || video.videoUrl}
+              playsInline
+              loop
+              muted={isMuted}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onWaiting={handleWaiting}
+              onCanPlay={handleCanPlay}
+              onEnded={handleEnded}
+              onPlay={handlePlay}
+              onPause={handlePause}
+            />
 
-        <div className="video-duration-badge">{video.duration}</div>
+            {/* Buffering Indicator */}
+            {isBuffering && (
+              <div className="buffering-indicator">
+                <md-circular-progress indeterminate></md-circular-progress>
+              </div>
+            )}
+
+            {/* Play/Pause Overlay Icon */}
+            {!isPlaying && !isBuffering && (
+              <div className="pause-overlay">
+                <md-icon>play_arrow</md-icon>
+              </div>
+            )}
+
+            {/* Mute Toggle */}
+            <div className="mute-toggle" onClick={handleToggleMute}>
+              <md-icon>{isMuted ? 'volume_off' : 'volume_up'}</md-icon>
+            </div>
+
+            {/* Speed Control */}
+            <div className="speed-toggle" onClick={toggleSpeed}>
+              <span>{playbackRate}x</span>
+            </div>
+
+            {/* Custom Controls Container */}
+            <div className="video-controls-container" onClick={(e) => e.stopPropagation()}>
+              <div className="video-seeker-container">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={progress}
+                  onChange={handleSeek}
+                  className="video-seeker"
+                />
+                <div className="video-time-display">
+                  {formatDuration(currentTime)} / {formatDuration(duration)}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="slideshow-container" style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <img
+              src={slides[currentSlide]}
+              alt={`Slide ${currentSlide}`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+
+            {/* Slideshow Indicators */}
+            <div className="slideshow-indicators" style={{
+              position: 'absolute',
+              bottom: '100px',
+              left: 0,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '4px',
+              zIndex: 15
+            }}>
+              {slides.map((_, idx) => (
+                <div key={idx} style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: idx === currentSlide ? 'white' : 'rgba(255,255,255,0.5)',
+                  transition: 'all 0.3s',
+                  transform: idx === currentSlide ? 'scale(1.2)' : 'scale(1)'
+                }} />
+              ))}
+            </div>
+
+            {/* Navigation Zones */}
+            <div
+              style={{ position: 'absolute', top: 0, left: 0, width: '30%', height: '100%', zIndex: 10 }}
+              onClick={(e) => handleSlideNav('prev', e)}
+            />
+            <div
+              style={{ position: 'absolute', top: 0, right: 0, width: '30%', height: '100%', zIndex: 10 }}
+              onClick={(e) => handleSlideNav('next', e)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Ações à direita */}
@@ -494,7 +593,10 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
         showShareModal && (
           <ShareModal
             video={video}
-            onClose={() => setShowShareModal(false)}
+            onClose={() => {
+              setShowShareModal(false)
+              setBottomNavHidden(false)
+            }}
             currentUser={currentUser}
             onShare={handleShare}
           />

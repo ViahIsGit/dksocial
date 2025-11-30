@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import NavigationDrawer from './components/NavigationDrawer'
 import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
+
 import Messages from './components/Messages'
 import Camera from './components/Camera'
 import MusicPage from './pages/MusicPage'
@@ -15,14 +16,17 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import PostSignup from './pages/PostSignup'
 import Profile from './components/Profile'
+import GlobalAddButton from './components/GlobalAddButton'
 import EditProfile from './components/EditProfile'
 import SettingsPage from './components/SettingsPage'
+import CreateModal from './components/CreateModal'
 import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
 import './App.css'
 
 function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { chromeHidden } = useLayout()
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const { chromeHidden, bottomNavHidden } = useLayout()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -47,7 +51,7 @@ function AppShell() {
   }
 
   const handleFABClick = () => {
-    navigate('/camera')
+    setIsCreateModalOpen(true)
   }
 
   const getActiveTab = () => {
@@ -67,14 +71,23 @@ function AppShell() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/music/:id" element={<MusicPage />} />
-          <Route path="/camera" element={<Camera />} />
+          <Route path="/camera" element={<Navigate to="/feed" replace />} />
           <Route path="/u" element={<Profile onMenuClick={handleMenuClick} drawerOpen={drawerOpen} />} />
           <Route path="/u/edit" element={<EditProfile />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/feed" replace />} />
         </Routes>
       </div>
-      {!chromeHidden && (
+
+      <GlobalAddButton onOpen={() => setIsCreateModalOpen(true)} />
+
+      <CreateModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        currentUser={auth.currentUser}
+      />
+
+      {!chromeHidden && !bottomNavHidden && (
         <BottomNav
           activeTab={getActiveTab()}
           onTabChange={handleTabChange}

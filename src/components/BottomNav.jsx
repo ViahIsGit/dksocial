@@ -39,18 +39,6 @@ function BottomNav({ activeTab, onTabChange, onFABClick }) {
         ))}
       </div>
 
-      {/* FAB Bottom Right */}
-      <div className="bottom-nav-fab-container">
-        <md-fab
-          className="bottom-nav-fab"
-          onClick={onFABClick}
-          aria-label="Adicionar novo vídeo"
-          label="Novo"
-          variant="primary"
-        >
-          <md-icon slot="icon">add</md-icon>
-        </md-fab>
-      </div>
     </nav>
   )
 }

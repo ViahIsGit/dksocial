@@ -17,27 +17,33 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
 
 .comments-modal {
-  width: 100%;
-  max-width: 600px;
+  width: 90%;
+  max-width: 400px;
   max-height: 80vh;
   background: var(--md-sys-color-surface-container);
-  border-radius: 24px 24px 0 0;
+  border-radius: 28px;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 @keyframes slideUp {
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -225,7 +231,7 @@
   padding: 16px 24px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
   flex-shrink: 0;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding-bottom: 16px;
 }
 
 .comment-input-container {
@@ -296,8 +302,8 @@
 /* Mobile */
 @media (max-width: 959px) {
   .comments-modal {
-    max-height: 90vh;
-    border-radius: 16px 16px 0 0;
+    max-height: 80vh;
+    border-radius: 28px;
   }
 
   .comments-header {
@@ -312,4 +318,3 @@
     padding: 12px 16px;
   }
 }
-
