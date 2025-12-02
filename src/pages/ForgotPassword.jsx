@@ -68,7 +68,7 @@ export default function ForgotPassword({ onShowLogin, onShowRegister }) {
             </div>
           )}
 
-          <md-filled-button type="submit" disabled={!canSubmit}>
+          <md-filled-button type="submit">
             {loading ? 'Enviando...' : 'Enviar link de redefinição'}
           </md-filled-button>
         </form>
@@ -85,5 +85,6 @@ export default function ForgotPassword({ onShowLogin, onShowRegister }) {
     </div>
   )
 }
+
 
 
