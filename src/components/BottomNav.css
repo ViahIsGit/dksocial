@@ -1,3 +1,37 @@
+/* Wrapper nav + FAB */
+.bottom-nav-wrapper {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px; /* padrão Material */
+  z-index: 1000;
+}
+
+/* FAB do @material/web */
+.bottom-nav-fab {
+  width: 56px;
+  height: 56px;
+
+  --md-fab-container-shape: 16px;
+  --md-fab-container-color: var(--md-sys-color-primary);
+  --md-fab-icon-color: var(--md-sys-color-on-primary);
+
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Desktop */
+@media (min-width: 960px) {
+  .bottom-nav-wrapper {
+    display: none;
+  }
+}
+
+
 .bottom-nav {
   position: fixed;
   bottom: 20px; /* ↓ levemente mais próximo do gesto */
