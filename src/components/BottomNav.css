@@ -1,8 +1,7 @@
 
-/* ===============================
-   WRAPPER (NAV + FAB)
-   → FAB NÃO altera a nav
-================================ */
+/* ===========================
+   WRAPPER -> centraliza nav + fab
+   =========================== */
 .bottom-nav-wrapper {
   position: fixed;
   bottom: 24px;
@@ -10,167 +9,190 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px; /* espaço entre pill e FAB */
   z-index: 1000;
+  pointer-events: auto;
 }
 
-/* ===============================
-   BOTTOM NAV (container)
-================================ */
+/* ===========================
+   BOTTOM NAV (pill)
+   =========================== */
 .bottom-nav {
-  width: 360px;
-  height: 64px;
+  /* largura adaptável para encaixar bem em telas */
+  width: min(86%, 620px);
+  max-width: 640px;
+  min-width: 320px;
 
-  background: var(--md-sys-color-surface-container-high);
-  border-radius: 32px;
+  height: 64px;
+  padding: 8px 20px; /* deixa espaço interno para os ícones */
+
+  background: var(--md-sys-color-secondary-container);
+  border-radius: 999px; /* deixa super arredondado, igual à imagem */
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  /* sombras suaves e "elevadas" */
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.18);
+    0 18px 30px rgba(31, 22, 54, 0.12),
+    0 6px 12px rgba(31, 22, 54, 0.06);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0,0,0,0.02);
 }
 
-/* ===============================
-   ITEMS CONTAINER
-================================ */
+/* container de ícones (distribuição) */
 .bottom-nav-items {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px; /* espaço entre ícones */
   width: 100%;
   height: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
+  box-sizing: border-box;
+  padding: 0 6px;
 }
 
-/* ===============================
-   ITEM
-================================ */
+/* ===========================
+   ITEM (botão) - sem label
+   =========================== */
 .bottom-nav-item {
-  flex: 1;
-  height: 100%;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  background: none;
+  width: 48px; /* área clicável */
+  height: 48px;
+
+  background: transparent;
   border: none;
   cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border-radius: 999px;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  position: relative;
+  transition: transform 0.12s ease;
 }
 
-/* ===============================
-   ICON CONTAINER
-================================ */
-.bottom-nav-icon-container {
-  position: relative;
-
-  width: 64px;
-  height: 32px;
-  border-radius: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 4px;
+/* leve feedback ao tocar */
+.bottom-nav-item:active {
+  transform: translateY(1px);
 }
 
-/* ===============================
-   SELECTION INDICATOR
-================================ */
+/* ===========================
+   INDICATOR (círculo atrás do ícone quando ativo)
+   =========================== */
 .bottom-nav-indicator {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
 
-  border-radius: 16px;
   background: transparent;
-
-  transition: background-color 0.2s ease;
+  box-shadow: none;
+  opacity: 0;
+  transition: all 0.18s cubic-bezier(.2,.9,.3,1);
+  z-index: 0;
 }
 
+/* indicador ativo: cor + sombra */
 .bottom-nav-indicator.active {
-  background: var(--md-sys-color-secondary-container);
+  background: rgba(46, 19, 84, 0.95); /* escolhi um roxo mais forte por cima do pill */
+  box-shadow:
+    0 8px 18px rgba(31, 22, 54, 0.18),
+    inset 0 -2px 6px rgba(0,0,0,0.06);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
-/* ===============================
-   ICON
-================================ */
+/* ===========================
+   ICON (md-icon)
+   =========================== */
 .bottom-nav-icon {
-  font-size: 24px;
-  color: var(--md-sys-color-on-surface-variant);
+  font-size: 20px;
   z-index: 1;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color 0.12s ease, transform 0.12s ease;
 }
 
+/* cor quando ativo (sobre o indicador) */
 .bottom-nav-item.active .bottom-nav-icon {
   color: var(--md-sys-color-on-surface);
+  transform: translateY(-1px);
 }
 
-/* ===============================
-   LABEL
-================================ */
-.bottom-nav-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--md-sys-color-on-surface-variant);
-  line-height: 1;
-}
-
-.bottom-nav-item.active .bottom-nav-label {
-  color: var(--md-sys-color-on-surface);
-  font-weight: 600;
-}
-
-/* ===============================
-   BADGE
-================================ */
+/* ===========================
+   BADGE (pequeno)
+   =========================== */
 .bottom-nav-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  top: 6px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
 
   background: var(--md-sys-color-error);
   color: var(--md-sys-color-on-error);
 
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-
   z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
-/* ===============================
-   FAB (Material Web)
-================================ */
+/* ===========================
+   FAB (quadrado arredondado, 56x56)
+   =========================== */
 .bottom-nav-fab {
   width: 56px;
   height: 56px;
 
-  --md-fab-container-shape: 16px;
-  --md-fab-container-color: var(--md-sys-color-primary);
-  --md-fab-icon-color: var(--md-sys-color-on-primary);
+  border-radius: 14px; /* quadrado arredondado como na imagem */
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.25);
+    0 16px 30px rgba(31, 22, 54, 0.18),
+    0 6px 12px rgba(31, 22, 54, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  border: 1px solid rgba(0,0,0,0.04);
 }
 
-/* ===============================
-   DESKTOP
-================================ */
+/* hover / active states (se usar em web desktop) */
+.bottom-nav-fab:hover {
+  transform: translateY(-2px);
+}
+.bottom-nav-fab:active {
+  transform: scale(0.98);
+  box-shadow:
+    0 8px 18px rgba(31, 22, 54, 0.14),
+    0 4px 8px rgba(31, 22, 54, 0.08);
+}
+
+/* tamanho do ícone dentro do FAB */
+.bottom-nav-fab md-icon,
+.bottom-nav-fab .material-icons {
+  font-size: 20px;
+  color: var(--md-sys-color-on-primary);
+}
+
+/* ===========================
+   RESPONSIVO: esconder em desktop se precisar
+   =========================== */
 @media (min-width: 960px) {
   .bottom-nav-wrapper {
     display: none;
