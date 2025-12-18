@@ -57,12 +57,13 @@ function BottomNav({ activeTab, onTabChange, onFABClick }) {
         aria-label="Criar"
         onClick={onFABClick}
       >
-        <md-icon slot="icon">add>amd-iconc
+        <md-icon slot="icon">add</md-icon>
       </md-fab>
     </div>
   )
 }
 
 export default BottomNav
+
 
 
