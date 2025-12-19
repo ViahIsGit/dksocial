@@ -7,11 +7,11 @@ function BottomNav({ activeTab, onTabChange, onFABClick }) {
   const { totalUnreadCount } = useMessages()
 
   const tabs = [
-    { id: 'feed', label: 'Feed', icon: 'inbox' },
+    { id: 'feed', label: 'Feed', icon: 'home' },
     {
       id: 'messages',
       label: 'Mensagens',
-      icon: 'mail',
+      icon: 'inbox',
       badge:
         totalUnreadCount > 0
           ? totalUnreadCount > 99
@@ -64,6 +64,7 @@ function BottomNav({ activeTab, onTabChange, onFABClick }) {
 }
 
 export default BottomNav
+
 
 
 
