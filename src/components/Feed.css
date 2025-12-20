@@ -73,26 +73,18 @@
     transform 120ms ease;
 }
 
-.feed-tab:active {
-  transform: scale(0.96);
-}
-
 .feed-tab.active {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-weight: 600;
 }
 
-/* Divider sutil */
-.tab-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--md-sys-color-outline-variant);
-  margin: 0 4px;
+.feed-tab:active {
+  transform: scale(0.96);
 }
 
 /* ===============================
-   SEARCH BUTTON (Icon Button M3)
+   SEARCH BUTTON
    =============================== */
 
 .feed-search-btn {
@@ -117,32 +109,23 @@
 
   cursor: pointer;
   pointer-events: auto;
-
-  transition:
-    background-color 180ms cubic-bezier(0.2, 0, 0, 1),
-    transform 120ms ease,
-    box-shadow 120ms ease;
 }
 
 .feed-search-btn:active {
   transform: scale(0.92);
-  box-shadow: var(--md-sys-elevation-1);
 }
 
 /* ===============================
-   SCROLL / SNAP FEED
+   SCROLL FEED
    =============================== */
 
 .feed-scroll-container {
   height: 100%;
   width: 100%;
-
   overflow-y: auto;
-  overscroll-behavior-y: contain;
 
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
-
   scrollbar-width: none;
 }
 
@@ -161,64 +144,197 @@
 
   scroll-snap-align: start;
   scroll-snap-stop: always;
-
-  background: var(--md-sys-color-surface);
 }
 
 /* ===============================
-   LOADING STATE
+   POST OVERLAY
    =============================== */
 
-.feed-loader {
+.post-overlay {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-
-  font-family: var(--md-sys-typescale-body-medium-font);
-  font-size: var(--md-sys-typescale-body-medium-size);
-  color: var(--md-sys-color-on-surface-variant);
-
-  z-index: 10;
+  pointer-events: none;
 }
 
 /* ===============================
-   EMPTY STATE
+   POST INFO (BOTTOM LEFT)
    =============================== */
 
-.feed-empty-state {
-  height: 100%;
-  padding: 32px;
+.post-info {
+  position: absolute;
+  left: 16px;
+  bottom: 24px;
+
+  max-width: min(88%, 420px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 14px 16px;
+  border-radius: 20px;
+
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 85%,
+    transparent
+  );
+
+  backdrop-filter: blur(22px);
+  box-shadow: var(--md-sys-elevation-2);
+
+  pointer-events: auto;
+}
+
+/* ===============================
+   USER ROW
+   =============================== */
+
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* PFP */
+
+.post-pfp {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 2px solid var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container);
+}
+
+/* USER TEXT */
+
+.post-user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-username {
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.post-audio {
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ===============================
+   FOLLOW BUTTON
+   =============================== */
+
+.follow-btn {
+  margin-left: auto;
+
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+
+  font-family: var(--md-sys-typescale-label-medium-font);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.follow-btn:active {
+  transform: scale(0.96);
+}
+
+/* ===============================
+   CAPTION
+   =============================== */
+
+.post-caption {
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: 1.4;
+
+  color: var(--md-sys-color-on-surface);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===============================
+   POST ACTIONS (RIGHT)
+   =============================== */
+
+.post-actions {
+  position: absolute;
+  right: 12px;
+  bottom: 96px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+
+  pointer-events: auto;
+}
+
+/* ACTION BUTTON */
+
+.action-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+
+  border: none;
+  background: color-mix(
+    in srgb,
+    var(--md-sys-color-surface-container-high) 85%,
+    transparent
+  );
+
+  color: var(--md-sys-color-on-surface);
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 2px;
 
-  gap: 12px;
+  backdrop-filter: blur(18px);
+  box-shadow: var(--md-sys-elevation-2);
 
-  color: var(--md-sys-color-on-surface-variant);
-  font-family: var(--md-sys-typescale-body-medium-font);
+  cursor: pointer;
 }
 
-.feed-empty-state span {
-  font-size: 48px;
-  opacity: 0.4;
+.action-btn span {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.action-btn:active {
+  transform: scale(0.9);
 }
 
 /* ===============================
-   SNAP LEGACY (if still used)
+   STATES
    =============================== */
 
-.feed-snap-container {
-  height: 100dvh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-}
-
-.feed-snap-item {
-  height: 100dvh;
-  scroll-snap-align: start;
-  display: flex;
+.feed-loader,
+.feed-empty-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--md-sys-color-on-surface-variant);
 }
