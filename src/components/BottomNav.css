@@ -1,7 +1,6 @@
-/* Wrapper geral */
 .bottom-nav-wrapper {
   position: fixed;
-  bottom: 16px;
+  bottom: 0;         
   left: 0;
   width: 100%;
   display: flex;
@@ -14,12 +13,12 @@
   pointer-events: auto;
   position: relative;
   height: 64px;
-  min-width: 90%;
-  max-width: 520px;
-  border-radius: 28px;
-  padding: 0 20px;
+  width: 100%;        
+  border-radius: 0;     
+  padding: 0 16px;
   display: flex;
   align-items: center;
+
   background: var(--md-sys-color-surface-container);
 }
 
