@@ -1,124 +1,95 @@
-/* ===============================
-   WRAPPER (NAV + FAB)
-================================ */
+/* Wrapper geral */
 .bottom-nav-wrapper {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  z-index: 1000;
-}
-
-/* ===============================
-   NAV BAR (COMPACTA)
-================================ */
-.bottom-nav {
-  height: 52px;
-  min-width: 260px;
-  max-width: 360px;
-
-  padding: 0 12px;
-
-  background: var(--md-sys-color-surface-container-high);
-  border-radius: 26px;
-
-  display: flex;
-  align-items: center;
-
-  box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.22),
-    0 2px 6px rgba(0, 0, 0, 0.16);
-}
-
-/* ===============================
-   ITEMS
-================================ */
-.bottom-nav-items {
+  bottom: 16px;
+  left: 0;
   width: 100%;
-  height: 100%;
-
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 100;
 }
 
-/* ===============================
-   BUTTON
-================================ */
-.bottom-nav-item {
-  flex: 1;
-  height: 100%;
+/* Barra */
+.bottom-nav {
+  pointer-events: auto;
+  position: relative;
+  height: 64px;
+  min-width: 90%;
+  max-width: 520px;
+  border-radius: 28px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+}
 
+/* Itens */
+.bottom-nav-items {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Botão */
+.bottom-nav-item {
+  position: relative;
   background: none;
   border: none;
-  padding: 0;
-
+  padding: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  cursor: pointer;
 }
 
-/* ===============================
-   ICON
-================================ */
+/* Ícone */
 .bottom-nav-icon {
-  font-size: 22px;
-  color: var(--md-sys-color-on-surface-variant);
-  transition: color 0.18s ease;
+  font-size: 24px;
+  z-index: 2;
 }
 
-/* ativo → só muda a cor */
-.bottom-nav-item.active .bottom-nav-icon {
-  color: var(--md-sys-color-primary);
+/* Indicador redondo atrás do ícone (ativo) */
+.bottom-nav-indicator {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1;
 }
 
-/* ===============================
-   BADGE
-================================ */
+.bottom-nav-indicator.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Badge */
 .bottom-nav-badge {
   position: absolute;
-  top: 6px;
-  right: 22px;
-
+  top: 2px;
+  right: 2px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-
-  border-radius: 999px;
-
-  background: var(--md-sys-color-error);
-  color: var(--md-sys-color-on-error);
-
+  border-radius: 8px;
   font-size: 10px;
-  font-weight: 600;
-
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 3;
 }
 
-/* ===============================
-   FAB (Material Web size)
-================================ */
+/* FAB */
 .bottom-nav-fab {
-  width: 52px;
-  height: 52px;
-   border-radius: 50px;
+  pointer-events: auto;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-/* ===============================
-   DESKTOP
-================================ */
-@media (min-width: 960px) {
-  .bottom-nav-wrapper {
-    display: none;
-  }
+/* Remove outline feio no mobile */
+.bottom-nav-item:focus-visible {
+  outline: none;
 }
-
