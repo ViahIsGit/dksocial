@@ -77,9 +77,7 @@ function AppShell() {
           <Route path="*" element={<Navigate to="/feed" replace />} />
         </Routes>
       </div>
-
-      <GlobalAddButton onOpen={() => setIsCreateModalOpen(true)} />
-
+      
       <CreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
