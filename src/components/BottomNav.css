@@ -10,7 +10,6 @@
   z-index: 100;
 }
 
-/* Barra */
 .bottom-nav {
   pointer-events: auto;
   position: relative;
@@ -21,13 +20,15 @@
   padding: 0 20px;
   display: flex;
   align-items: center;
+  background: var(--md-sys-color-surface-container);
 }
+
 
 /* Itens */
 .bottom-nav-items {
   display: flex;
-  align-items: center;
-  gap: 28px;
+  align-items: left;
+  gap: 23px;
 }
 
 /* Botão */
