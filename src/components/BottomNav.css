@@ -87,6 +87,8 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
+  --md-fab-container-color: var(--md-sys-color-on-surface-variant) !important;
+  --md-fab-icon-color: var(--md-sys-color-primary-container) !important;
 }
 
 /* Remove outline feio no mobile */
