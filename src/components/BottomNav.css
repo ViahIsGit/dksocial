@@ -11,7 +11,7 @@
 
 .bottom-nav {
   pointer-events: auto;
-  position: fixed;
+  position: relative;
   height: 64px;
   width: 100%;        
   border-radius: 0;     
