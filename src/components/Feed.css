@@ -136,3 +136,15 @@
   margin-bottom: 16px;
   opacity: 0.5;
 }
+
+.feed-snap-container {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+}
+
+.feed-snap-item {
+  height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+}
