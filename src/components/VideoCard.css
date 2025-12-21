@@ -218,17 +218,17 @@
   flex-direction: column;
   align-items: center;
 }
-
 .video-avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid white;
+
   background: var(--md-sys-color-surface-container);
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--md-sys-color-primary);
+
+  box-shadow: var(--md-sys-elevation-1);
 }
 
 .video-avatar img {
@@ -236,27 +236,24 @@
   height: 100%;
   object-fit: cover;
 }
-
 .video-follow-badge {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ff3b5c;
-  /* Standard follow color */
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: none;
-  cursor: pointer;
-  z-index: 2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  padding: 0;
+  bottom: -6px;
+  right: -6px;
+
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+
+  display: grid;
+  place-items: center;
+
+  box-shadow: var(--md-sys-elevation-1);
 }
+
 
 .video-follow-badge md-icon {
   font-size: 16px;
@@ -275,15 +272,17 @@
 .video-actions-right {
   position: absolute;
   right: 12px;
-  top: 50%;
+
+  /* 👇 desce a pill (antes era 50%) */
+  top: 60%;
   transform: translateY(-50%);
 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 
-  padding: 6px;
+  padding: 8px 6px;
   border-radius: 999px;
 
   background: color-mix(
