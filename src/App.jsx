@@ -17,6 +17,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import PostSignup from './pages/PostSignup'
+import Download from './pages/Download'
 
 import Profile from './components/Profile'
 import EditProfile from './components/EditProfile'
@@ -97,6 +98,7 @@ function AppShell() {
 
       <div className="app-main">
         <Routes>
+          <Route path="/download" element={<Download />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/music/:id" element={<MusicPage />} />
