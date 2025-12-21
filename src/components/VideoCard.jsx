@@ -501,31 +501,70 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
         )}
       </div>
 
-      {/* Ações à direita */}
-      <div className="video-actions-right">
-        <div className={`action-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
-          <md-icon className={isLiked ? 'liked' : ''}>
-            {isLiked ? 'favorite' : 'favorite'}
-          </md-icon>
-          <span>{formatNumber(likes)}</span>
-        </div>
+{/* Ações à direita */}
+<div className="video-actions-right">
+  <div className="video-avatar">
+    <img src={video.avatar} alt={video.username} />
 
-        <div className="action-button" onClick={(e) => { e.stopPropagation(); setShowComments(true); }}>
-          <md-icon>comment</md-icon>
-          <span>{formatNumber(video.comments || 0)}</span>
-        </div>
+    {currentUser &&
+      video.userId &&
+      video.userId !== currentUser.uid &&
+      !isFollowingUser &&
+      !isFriend && (
+        <button
+          className="video-follow-badge"
+          onClick={handleFollow}
+        >
+          <md-icon>add</md-icon>
+        </button>
+      )}
 
-        <div className="action-button action-button-share" onClick={(e) => { e.stopPropagation(); handleShareClick(); }}>
-          <md-icon>share</md-icon>
-          <span>{formatNumber(shares)}</span>
-        </div>
-
-        <div className={`action-button ${isFavorited ? 'favorited' : ''}`} onClick={handleFavorite}>
-          <md-icon className={isFavorited ? 'favorited' : ''}>
-            {isFavorited ? 'bookmark' : 'bookmark'}
-          </md-icon>
-        </div>
+    {isFollowingUser && !isFriend && (
+      <div className="video-follow-badge following">
+        <md-icon>check</md-icon>
       </div>
+    )}
+  </div>
+
+  <div className={`action-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+    <md-icon className={isLiked ? 'liked' : ''}>
+      favorite
+    </md-icon>
+    <span>{formatNumber(likes)}</span>
+  </div>
+
+  <div
+    className="action-button"
+    onClick={(e) => {
+      e.stopPropagation()
+      setShowComments(true)
+    }}
+  >
+    <md-icon>comment</md-icon>
+    <span>{formatNumber(video.comments || 0)}</span>
+  </div>
+
+  <div
+    className="action-button action-button-share"
+    onClick={(e) => {
+      e.stopPropagation()
+      handleShareClick()
+    }}
+  >
+    <md-icon>share</md-icon>
+    <span>{formatNumber(shares)}</span>
+  </div>
+
+  <div
+    className={`action-button ${isFavorited ? 'favorited' : ''}`}
+    onClick={handleFavorite}
+  >
+    <md-icon className={isFavorited ? 'favorited' : ''}>
+      bookmark
+    </md-icon>
+  </div>
+</div>
+
 
       {/* Info na parte inferior esquerda */}
       <div className="video-info">
@@ -557,27 +596,6 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
           </div>
         </div>
       </div>
-
-      {/* Avatar with Follow Badge positioned absolutely */}
-      <div className="video-avatar-container">
-        <div className="video-avatar">
-          <img src={video.avatar} alt={video.username} />
-        </div>
-        {currentUser && video.userId && video.userId !== currentUser.uid && !isFollowingUser && !isFriend && (
-          <button
-            className="video-follow-badge"
-            onClick={handleFollow}
-          >
-            <md-icon>add</md-icon>
-          </button>
-        )}
-        {isFollowingUser && !isFriend && (
-          <div className="video-follow-badge following">
-            <md-icon>check</md-icon>
-          </div>
-        )}
-      </div>
-
 
       {
         showComments && (
