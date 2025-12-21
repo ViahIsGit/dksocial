@@ -1,193 +1,293 @@
+/* ===============================
+   CREATE MODAL (Material You)
+   =============================== */
+
 .create-modal {
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    border: none;
-    background: black;
-    color: white;
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
+  width: 100%;
+  height: 100dvh;
+  border: none;
+  margin: 0;
+  padding: 0;
+
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+
+  overflow: hidden;
 }
 
 .create-modal::backdrop {
-    background: black;
+  background: var(--md-sys-color-scrim);
 }
+
+/* ===============================
+   CONTENT
+   =============================== */
 
 .create-modal-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
+
+/* ===============================
+   CLOSE BUTTON (M3 Icon Button)
+   =============================== */
 
 .close-btn {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.5);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  left: 16px;
+  z-index: 100;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+
+  border: none;
+  box-shadow: var(--md-sys-elevation-2);
+  backdrop-filter: blur(16px);
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    transform 120ms ease;
 }
 
-/* Step: Select */
+.close-btn:active {
+  transform: scale(0.92);
+}
+
+/* ===============================
+   STEP: SELECT
+   =============================== */
+
 .step-select {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 32px;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  gap: 32px;
+  padding: 24px;
 }
 
 .step-select h2 {
-    font-family: 'Google Sans', sans-serif;
-    font-weight: 500;
-    font-size: 1.5rem;
+  font-family: var(--md-sys-typescale-title-large-font, 'Google Sans');
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
 }
 
+/* Options */
 .select-options {
-    display: flex;
-    gap: 24px;
+  display: flex;
+  gap: 24px;
 }
 
 .select-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
+  all: unset;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  color: var(--md-sys-color-on-surface);
 }
 
+/* Card */
 .option-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 24px;
-    background: var(--md-sys-color-surface-container-high);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
+  width: 88px;
+  height: 88px;
+  border-radius: 28px;
+
+  display: grid;
+  place-items: center;
+
+  background: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-1);
+
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
-.option-icon md-icon {
-    font-size: 32px;
+.select-option:hover .option-icon {
+  box-shadow: var(--md-sys-elevation-2);
 }
 
 .select-option:active .option-icon {
-    transform: scale(0.95);
+  transform: scale(0.94);
 }
 
-/* Step: Camera */
+.option-icon md-icon {
+  font-size: 32px;
+  color: var(--md-sys-color-primary);
+}
+
+/* ===============================
+   STEP: CAMERA
+   =============================== */
+
 .step-camera {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
+  background: var(--md-sys-color-background);
 }
 
-/* Step: Editor */
+/* ===============================
+   STEP: EDITOR
+   =============================== */
+
 .step-editor {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Preview */
 .editor-preview {
-    flex: 1;
-    background: #121212;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  flex: 1;
+  background: var(--md-sys-color-surface-container-highest);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+  position: relative;
 }
 
 .preview-media {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
+/* ===============================
+   SLIDESHOW
+   =============================== */
+
 .slideshow-preview {
-    width: 100%;
-    height: 100%;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 .slideshow-indicators {
-    position: absolute;
-    bottom: 16px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    padding: 0 16px;
+  position: absolute;
+  bottom: 16px;
+  inset-inline: 0;
+
+  display: flex;
+  justify-content: center;
+  gap: 6px;
 }
 
 .indicator {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transition: all 0.3s;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+
+  background: var(--md-sys-color-outline-variant);
+  transition: transform 160ms ease, background-color 160ms ease;
 }
 
 .indicator.active {
-    background: white;
-    transform: scale(1.2);
+  background: var(--md-sys-color-primary);
+  transform: scale(1.3);
 }
+
+/* ===============================
+   CONTROLS (Bottom Sheet)
+   =============================== */
 
 .editor-controls {
-    padding: 16px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    background: #1e1e1e;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+
+  background: var(--md-sys-color-surface-container-low);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  box-shadow: var(--md-sys-elevation-2);
 }
+
+/* ===============================
+   INPUT
+   =============================== */
 
 .description-input {
-    width: 100%;
-    min-height: 80px;
-    background: #2c2c2c;
-    border: none;
-    border-radius: 12px;
-    padding: 12px;
-    color: white;
-    font-family: 'Google Sans Text', sans-serif;
-    resize: none;
+  width: 100%;
+  min-height: 96px;
+
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+
+  border: 1px solid transparent;
+  border-radius: 16px;
+
+  padding: 12px 14px;
+  resize: none;
+
+  font-family: var(--md-sys-typescale-body-medium-font, 'Google Sans Text');
+  font-size: 0.95rem;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 
+.description-input:focus {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-surface-container);
+}
+
+/* ===============================
+   POST BUTTON (Filled M3)
+   =============================== */
+
 .post-btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    border: none;
-    border-radius: 24px;
-    font-family: 'Google Sans', sans-serif;
-    font-weight: 500;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: opacity 0.2s;
+  width: 100%;
+  padding: 14px;
+
+  border-radius: 999px;
+  border: none;
+
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+
+  font-family: var(--md-sys-typescale-label-large-font, 'Google Sans');
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.post-btn:active {
+  transform: scale(0.96);
 }
 
 .post-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
