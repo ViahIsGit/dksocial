@@ -28,30 +28,34 @@ import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
 import './App.css'
 
 /* ===============================
-   🔎 Detecta WebView vs Browser
+   🔎 Detecta WebView
 ================================ */
 function isWebView() {
   if (window.IS_APP_WEBVIEW) return true
 
   const ua = navigator.userAgent || navigator.vendor || window.opera
 
-  // Android WebView
   if (/wv/.test(ua)) return true
 
-  // iOS WebView
-  if (
-    /iPhone|iPod|iPad/.test(ua) &&
-    !/Safari/.test(ua)
-  ) {
+  if (/iPhone|iPad|iPod/.test(ua) && !/Safari/.test(ua)) {
     return true
   }
 
   return false
 }
 
-const DOWNLOAD_URL = 'https://seusite.com/download'
-// ou Play Store:
-// const DOWNLOAD_URL = 'https://play.google.com/store/apps/details?id=com.seuapp'
+/* ===============================
+   🔓 Rotas liberadas no navegador
+================================ */
+const ALLOWED_ROUTES = [
+  '/download',
+  '/privacy',
+  '/terms'
+]
+
+const DOWNLOAD_URL = '/download'
+// ou externo:
+// const DOWNLOAD_URL = 'https://seusite.com/download'
 
 /* ===============================
    📦 App Shell
@@ -63,13 +67,8 @@ function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const handleMenuClick = () => {
-    setDrawerOpen(!drawerOpen)
-  }
-
-  const handleDrawerClose = () => {
-    setDrawerOpen(false)
-  }
+  const handleMenuClick = () => setDrawerOpen(!drawerOpen)
+  const handleDrawerClose = () => setDrawerOpen(false)
 
   const handleTabChange = (tabId) => {
     const routes = {
@@ -78,13 +77,10 @@ function AppShell() {
       camera: '/camera',
       profile: '/u'
     }
-
     if (routes[tabId]) navigate(routes[tabId])
   }
 
-  const handleFABClick = () => {
-    setIsCreateModalOpen(true)
-  }
+  const handleFABClick = () => setIsCreateModalOpen(true)
 
   const getActiveTab = () => {
     const path = location.pathname
@@ -156,18 +152,9 @@ function ProtectedRoute({ children, profileStatus, profileData, onProfileUpdated
 function AuthRoutes({ setAuthView }) {
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={<Login onShowRegister={() => setAuthView('register')} onShowForgot={() => setAuthView('forgot')} />}
-      />
-      <Route
-        path="/register"
-        element={<Register onShowLogin={() => setAuthView('login')} onShowForgot={() => setAuthView('forgot')} />}
-      />
-      <Route
-        path="/forgot-password"
-        element={<ForgotPassword onShowLogin={() => setAuthView('login')} onShowRegister={() => setAuthView('register')} />}
-      />
+      <Route path="/login" element={<Login onShowRegister={() => setAuthView('register')} onShowForgot={() => setAuthView('forgot')} />} />
+      <Route path="/register" element={<Register onShowLogin={() => setAuthView('login')} onShowForgot={() => setAuthView('forgot')} />} />
+      <Route path="/forgot-password" element={<ForgotPassword onShowLogin={() => setAuthView('login')} onShowRegister={() => setAuthView('register')} />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
@@ -184,13 +171,17 @@ export default function App() {
   const [profileStatus, setProfileStatus] = useState('idle')
   const [profileData, setProfileData] = useState(null)
 
-  /* 🔁 Redireciona para download se for navegador */
+  /* 🔁 Redirecionamento inteligente */
   useEffect(() => {
-    if (!isWebView()) {
-      if (!sessionStorage.getItem('redirected_to_download')) {
-        sessionStorage.setItem('redirected_to_download', 'true')
-        window.location.href = DOWNLOAD_URL
-      }
+    if (isWebView()) return
+
+    const path = window.location.pathname
+
+    if (ALLOWED_ROUTES.includes(path)) return
+
+    if (!sessionStorage.getItem('redirected_to_download')) {
+      sessionStorage.setItem('redirected_to_download', 'true')
+      window.location.href = DOWNLOAD_URL
     }
   }, [])
 
