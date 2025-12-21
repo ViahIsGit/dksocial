@@ -4,7 +4,7 @@ import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel, followUs
 import { useLayout } from '../context/LayoutContext'
 import CommentsModal from './CommentsModal'
 import ShareModal from './ShareModal'
-import './VideoCard.css'
+
 
 function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPlayRequest }) {
   const navigate = useNavigate()
