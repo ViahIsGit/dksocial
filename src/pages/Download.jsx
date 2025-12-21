@@ -6,7 +6,7 @@ export default function Download() {
       <div className="download-card">
 
         <img
-          src="/feed/logo.png"
+          src="/public/logo.png"
           alt="App Logo"
           className="download-logo"
         />
