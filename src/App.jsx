@@ -1,27 +1,61 @@
 import { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+
 import NavigationDrawer from './components/NavigationDrawer'
 import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
-
 import Messages from './components/Messages'
 import Camera from './components/Camera'
 import MusicPage from './pages/MusicPage'
+
 import { LayoutProvider, useLayout } from './context/LayoutContext'
 import { MessagesProvider } from './context/MessagesContext'
 import { ThemeProvider } from './context/ThemeContext'
+
 import SplashScreen from './pages/SplashScreen'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import PostSignup from './pages/PostSignup'
+
 import Profile from './components/Profile'
 import EditProfile from './components/EditProfile'
 import SettingsPage from './components/SettingsPage'
 import CreateModal from './components/CreateModal'
+
 import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
+
 import './App.css'
 
+/* ===============================
+   🔎 Detecta WebView vs Browser
+================================ */
+function isWebView() {
+  if (window.IS_APP_WEBVIEW) return true
+
+  const ua = navigator.userAgent || navigator.vendor || window.opera
+
+  // Android WebView
+  if (/wv/.test(ua)) return true
+
+  // iOS WebView
+  if (
+    /iPhone|iPod|iPad/.test(ua) &&
+    !/Safari/.test(ua)
+  ) {
+    return true
+  }
+
+  return false
+}
+
+const DOWNLOAD_URL = 'https://seusite.com/download'
+// ou Play Store:
+// const DOWNLOAD_URL = 'https://play.google.com/store/apps/details?id=com.seuapp'
+
+/* ===============================
+   📦 App Shell
+================================ */
 function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -44,9 +78,8 @@ function AppShell() {
       camera: '/camera',
       profile: '/u'
     }
-    if (routes[tabId]) {
-      navigate(routes[tabId])
-    }
+
+    if (routes[tabId]) navigate(routes[tabId])
   }
 
   const handleFABClick = () => {
@@ -65,6 +98,7 @@ function AppShell() {
   return (
     <div className={`App ${drawerOpen ? 'drawer-open' : ''} no-header`}>
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
+
       <div className="app-main">
         <Routes>
           <Route path="/feed" element={<Feed />} />
@@ -77,7 +111,7 @@ function AppShell() {
           <Route path="*" element={<Navigate to="/feed" replace />} />
         </Routes>
       </div>
-      
+
       <CreateModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -95,6 +129,9 @@ function AppShell() {
   )
 }
 
+/* ===============================
+   🔐 Protected Route
+================================ */
 function ProtectedRoute({ children, profileStatus, profileData, onProfileUpdated, onLogout }) {
   if (profileStatus === 'needs_setup') {
     return (
@@ -105,47 +142,40 @@ function ProtectedRoute({ children, profileStatus, profileData, onProfileUpdated
       />
     )
   }
+
   if (profileStatus === 'checking') {
     return <SplashScreen />
   }
+
   return children
 }
 
-function AuthRoutes({ authView, setAuthView }) {
+/* ===============================
+   🔑 Auth Routes
+================================ */
+function AuthRoutes({ setAuthView }) {
   return (
     <Routes>
       <Route
         path="/login"
-        element={
-          <Login
-            onShowRegister={() => setAuthView('register')}
-            onShowForgot={() => setAuthView('forgot')}
-          />
-        }
+        element={<Login onShowRegister={() => setAuthView('register')} onShowForgot={() => setAuthView('forgot')} />}
       />
       <Route
         path="/register"
-        element={
-          <Register
-            onShowLogin={() => setAuthView('login')}
-            onShowForgot={() => setAuthView('forgot')}
-          />
-        }
+        element={<Register onShowLogin={() => setAuthView('login')} onShowForgot={() => setAuthView('forgot')} />}
       />
       <Route
         path="/forgot-password"
-        element={
-          <ForgotPassword
-            onShowLogin={() => setAuthView('login')}
-            onShowRegister={() => setAuthView('register')}
-          />
-        }
+        element={<ForgotPassword onShowLogin={() => setAuthView('login')} onShowRegister={() => setAuthView('register')} />}
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }
 
+/* ===============================
+   🚀 App Root
+================================ */
 export default function App() {
   const [user, setUser] = useState(null)
   const [authReady, setAuthReady] = useState(false)
@@ -153,6 +183,16 @@ export default function App() {
   const [authView, setAuthView] = useState('login')
   const [profileStatus, setProfileStatus] = useState('idle')
   const [profileData, setProfileData] = useState(null)
+
+  /* 🔁 Redireciona para download se for navegador */
+  useEffect(() => {
+    if (!isWebView()) {
+      if (!sessionStorage.getItem('redirected_to_download')) {
+        sessionStorage.setItem('redirected_to_download', 'true')
+        window.location.href = DOWNLOAD_URL
+      }
+    }
+  }, [])
 
   const loadProfileData = useCallback(async (currentUser) => {
     if (!currentUser) {
@@ -162,6 +202,7 @@ export default function App() {
     }
 
     setProfileStatus('checking')
+
     try {
       const ref = doc(db, 'users', currentUser.uid)
       const snapshot = await getDoc(ref)
@@ -177,36 +218,35 @@ export default function App() {
       }
 
       const data = snapshot.data()
+      const isComplete = Boolean(data.profileSetupCompleted && data.username && data.userHandle)
+
       setProfileData({
         ...data,
         uid: currentUser.uid,
         email: currentUser.email,
         fullName: data.fullName || currentUser.displayName || ''
       })
-      const isComplete = Boolean(data.profileSetupCompleted && data.username && data.userHandle)
+
       setProfileStatus(isComplete ? 'ready' : 'needs_setup')
-    } catch (error) {
-      console.error('Erro ao carregar perfil', error)
+    } catch (err) {
+      console.error('Erro ao carregar perfil', err)
       setProfileStatus('error')
     }
   }, [])
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
       setAuthReady(true)
       loadProfileData(currentUser)
     })
 
-    return () => unsubscribe()
+    return () => unsub()
   }, [loadProfileData])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setSplashDone(true)
-    }, 5000)
-
-    return () => window.clearTimeout(timer)
+    const timer = setTimeout(() => setSplashDone(true), 5000)
+    return () => clearTimeout(timer)
   }, [])
 
   const shouldShowSplash = !authReady || !splashDone
@@ -231,7 +271,7 @@ export default function App() {
                 <AppShell />
               </ProtectedRoute>
             ) : (
-              <AuthRoutes authView={authView} setAuthView={setAuthView} />
+              <AuthRoutes setAuthView={setAuthView} />
             )}
           </BrowserRouter>
         </MessagesProvider>
