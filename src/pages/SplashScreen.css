@@ -11,21 +11,6 @@
   position: relative;
 }
 
-/* Camada tonal sutil (Material style) */
-.splash-screen::before {
-  content: '';
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(
-      circle at center,
-      var(--md-sys-color-primary-container) 0%,
-      transparent 60%
-    );
-  opacity: 0.35;
-  z-index: 0;
-}
-
 /* Container do logo */
 .splash-content {
   position: relative;
@@ -46,3 +31,4 @@
 
   display: block;
 }
+
