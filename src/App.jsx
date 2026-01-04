@@ -32,7 +32,7 @@ import './App.css'
 /* ===============================
    📦 App Shell
 ================================ */
-function AppShell() {
+function AppShell({ profileData }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { chromeHidden, bottomNavHidden } = useLayout()
@@ -43,14 +43,23 @@ function AppShell() {
   const handleDrawerClose = () => setDrawerOpen(false)
 
   const handleTabChange = (tabId) => {
-    const routes = {
-      feed: '/feed',
-      messages: '/messages',
-      camera: '/camera',
-      profile: '/u'
+  if (tabId === 'profile') {
+    if (profileData?.userHandle) {
+      navigate(`/u/${profileData.userHandle}`)
+    } else {
+      navigate('/feed')
     }
-    if (routes[tabId]) navigate(routes[tabId])
+    return
   }
+
+  const routes = {
+    feed: '/feed',
+    messages: '/messages',
+    camera: '/camera'
+  }
+
+  if (routes[tabId]) navigate(routes[tabId])
+}
 
   const handleFABClick = () => setIsCreateModalOpen(true)
 
