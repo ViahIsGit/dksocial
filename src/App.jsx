@@ -28,35 +28,6 @@ import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
 
 import './App.css'
 
-/* ===============================
-   🔎 Detecta WebView
-================================ */
-function isWebView() {
-  if (window.IS_APP_WEBVIEW) return true
-
-  const ua = navigator.userAgent || navigator.vendor || window.opera
-
-  if (/wv/.test(ua)) return true
-
-  if (/iPhone|iPad|iPod/.test(ua) && !/Safari/.test(ua)) {
-    return true
-  }
-
-  return false
-}
-
-/* ===============================
-   🔓 Rotas liberadas no navegador
-================================ */
-const ALLOWED_ROUTES = [
-  '/download',
-  '/privacy',
-  '/terms'
-]
-
-const DOWNLOAD_URL = '/download'
-// ou externo:
-// const DOWNLOAD_URL = 'https://seusite.com/download'
 
 /* ===============================
    📦 App Shell
@@ -97,17 +68,26 @@ function AppShell() {
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
 
       <div className="app-main">
-        <Routes>
-          <Route path="/download" element={<Download />} />
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/music/:id" element={<MusicPage />} />
-          <Route path="/camera" element={<Navigate to="/feed" replace />} />
-          <Route path="/u" element={<Profile onMenuClick={handleMenuClick} drawerOpen={drawerOpen} />} />
-          <Route path="/u/edit" element={<EditProfile />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/feed" replace />} />
-        </Routes>
+      <Routes>
+  <Route path="/download" element={<Download />} />
+  <Route path="/feed" element={<Feed />} />
+  <Route path="/messages" element={<Messages />} />
+  <Route path="/music/:id" element={<MusicPage />} />
+
+  {/* Perfil */}
+  <Route path="/u/:handle" element={
+    <Profile
+      onMenuClick={handleMenuClick}
+      drawerOpen={drawerOpen}
+    />
+  } />
+
+  <Route path="/u/edit" element={<EditProfile />} />
+
+  <Route path="/settings" element={<SettingsPage />} />
+
+  <Route path="*" element={<Navigate to="/feed" replace />} />
+</Routes>
       </div>
 
       <CreateModal
@@ -172,20 +152,6 @@ export default function App() {
   const [authView, setAuthView] = useState('login')
   const [profileStatus, setProfileStatus] = useState('idle')
   const [profileData, setProfileData] = useState(null)
-
-  /* 🔁 Redirecionamento inteligente */
-  useEffect(() => {
-    if (isWebView()) return
-
-    const path = window.location.pathname
-
-    if (ALLOWED_ROUTES.includes(path)) return
-
-    if (!sessionStorage.getItem('redirected_to_download')) {
-      sessionStorage.setItem('redirected_to_download', 'true')
-      window.location.href = DOWNLOAD_URL
-    }
-  }, [])
 
   const loadProfileData = useCallback(async (currentUser) => {
     if (!currentUser) {
