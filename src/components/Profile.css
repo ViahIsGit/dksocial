@@ -223,20 +223,6 @@
 }
 
 /* ===============================
-   ACTIONS
-   =============================== */
-
-.profile-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 420px;
-  width: 100%;
-}
-
-/* ===============================
    TABS (Material You Pills)
    =============================== */
 
@@ -472,4 +458,5 @@
     gap: 20px;
   }
 }
+
 
