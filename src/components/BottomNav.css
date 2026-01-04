@@ -1,39 +1,209 @@
+/* ===============================
+   WRAPPER
+================================ */
 .bottom-nav-wrapper {
   position: fixed;
-  bottom: 0;         
+  bottom: 0;
   left: 0;
   width: 100%;
+
   display: flex;
   justify-content: center;
+
   pointer-events: none;
   z-index: 100;
 }
 
+/* ===============================
+   NAV BAR
+================================ */
 .bottom-nav {
   pointer-events: auto;
   position: relative;
-  height: 64px;
-  width: 100%;        
-  border-radius: 0;     
+
+  height: 72px;
+  width: 100%;
+
   padding: 0 16px;
   display: flex;
   align-items: center;
 
   background: var(--md-sys-color-surface-container);
+
+  box-shadow:
+    0 -4px 12px rgba(0, 0, 0, 0.08),
+    0 -1px 3px rgba(0, 0, 0, 0.12);
 }
 
-
-/* Itens */
+/* ===============================
+   ITEMS CONTAINER
+================================ */
 .bottom-nav-items {
   display: flex;
-  align-items: left;
-  gap: 23px;
+  align-items: center;
+  gap: 22px;
 }
 
-/* Botão */
+/* ===============================
+   ITEM BUTTON
+================================ */
 .bottom-nav-item {
   position: relative;
+
   background: none;
+  border: none;
+
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hover (desktop / tablet) */
+.bottom-nav-item:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--md-sys-color-primary) 12%,
+    transparent
+  );
+}
+
+/* Active (toque mobile) */
+.bottom-nav-item:active {
+  transform: scale(0.9);
+}
+
+/* Remove outline feio */
+.bottom-nav-item:focus-visible {
+  outline: none;
+}
+
+/* ===============================
+   ICON
+================================ */
+.bottom-nav-icon {
+  font-size: 30px;
+  z-index: 2;
+
+  color: var(--md-sys-color-on-surface-variant);
+
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Ícone ativo */
+.bottom-nav-item.active .bottom-nav-icon {
+  color: var(--md-sys-color-on-secondary-container);
+  transform: translateY(-1px);
+}
+
+/* ===============================
+   ACTIVE INDICATOR (CIRCLE)
+================================ */
+.bottom-nav-indicator {
+  position: absolute;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+
+  background: var(--md-sys-color-secondary-container);
+
+  opacity: 0;
+  transform: scale(0.6);
+  filter: blur(0.5px);
+
+  transition:
+    opacity 0.25s cubic-bezier(.2, 1, .3, 1),
+    transform 0.35s cubic-bezier(.2, 1, .3, 1);
+
+  z-index: 1;
+}
+
+/* Ativo */
+.bottom-nav-indicator.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ===============================
+   BADGE
+================================ */
+.bottom-nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  z-index: 3;
+}
+
+/* ===============================
+   FAB
+================================ */
+.bottom-nav-fab {
+  pointer-events: auto;
+
+  position: absolute;
+  right: 16px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  --md-fab-container-color: var(--md-sys-color-primary);
+  --md-fab-icon-color: var(--md-sys-color-on-primary);
+
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bottom-nav-fab:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* ===============================
+   SAFE AREA (iOS)
+================================ */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(72px + env(safe-area-inset-bottom));
+  }
+}
   border: none;
   padding: 8px;
   cursor: pointer;
