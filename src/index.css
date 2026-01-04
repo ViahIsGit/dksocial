@@ -56,9 +56,9 @@
 
 * {
   margin: 0;
-  -webkit-highlight-color: none;
+  -webkit-highlight-color: transparent;
   padding: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: 'Outfit', sans-serif;
   box-sizing: border-box;
 }
 
