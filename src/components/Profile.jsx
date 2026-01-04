@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react'
-import { auth, db, doc, getDoc, onAuthStateChanged, collection, getDocs, query, where, orderBy, limit } from '../firebase/config'
+import {
+  auth,
+  db,
+  doc,
+  getDoc,
+  onAuthStateChanged,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit
+} from '../firebase/config'
 import { signOut } from 'firebase/auth'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { followUser, unfollowUser, isFollowing } from '../services/reels'
 import { getOrCreateConversation } from '../services/messages'
 import ProfileVideoViewer from './ProfileVideoViewer'
@@ -10,30 +22,297 @@ import SettingsSheet from './SettingsSheet'
 import './Profile.css'
 
 export default function Profile({ onMenuClick, drawerOpen }) {
-  const [user, setUser] = useState(null)
+  const { handle } = useParams()
+  const navigate = useNavigate()
+
+  const [currentUser, setCurrentUser] = useState(null)
   const [profileData, setProfileData] = useState(null)
   const [loading, setLoading] = useState(true)
+
   const [isFollowingUser, setIsFollowingUser] = useState(false)
   const [isFriend, setIsFriend] = useState(false)
   const [followersCount, setFollowersCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
-  const [viewerOpen, setViewerOpen] = useState(false);
+
+  const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerVideos, setViewerVideos] = useState([])
   const [viewerInitialIndex, setViewerInitialIndex] = useState(0)
+
   const [userPosts, setUserPosts] = useState([])
   const [favorites, setFavorites] = useState([])
-  const [activeTab, setActiveTab] = useState('posts') // 'posts', 'favorites', 'following'
+  const [activeTab, setActiveTab] = useState('posts')
   const [postsLoading, setPostsLoading] = useState(false)
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const navigate = useNavigate()
 
-  const isOwnProfile = user && profileData && user.uid === profileData.uid
+  const isOwnProfile =
+    currentUser && profileData && currentUser.uid === profileData.uid
 
+  /* =========================
+     Auth (quem está logado)
+     ========================= */
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser)
-        try {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  /* =========================
+     Carregar perfil pelo handle
+     ========================= */
+  useEffect(() => {
+    if (!handle) return
+
+    const loadProfile = async () => {
+      setLoading(true)
+      try {
+        const usersRef = collection(db, 'users')
+        const q = query(usersRef, where('userHandle', '==', handle))
+        const snapshot = await getDocs(q)
+
+        if (snapshot.empty) {
+          navigate('/404')
+          return
+        }
+
+        const snap = snapshot.docs[0]
+        setProfileData({
+          uid: snap.id,
+          ...snap.data()
+        })
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [handle, navigate])
+
+  /* =========================
+     Estatísticas de follow
+     ========================= */
+  useEffect(() => {
+    if (!currentUser || !profileData) return
+
+    const loadStats = async () => {
+      const followersRef = collection(
+        db,
+        'followers',
+        profileData.uid,
+        'userFollowers'
+      )
+      const followingRef = collection(
+        db,
+        'followers',
+        profileData.uid,
+        'userFollowing'
+      )
+
+      const followersSnap = await getDocs(followersRef)
+      const followingSnap = await getDocs(followingRef)
+
+      setFollowersCount(followersSnap.size)
+      setFollowingCount(followingSnap.size)
+
+      if (!isOwnProfile) {
+        const following = await isFollowing(profileData.uid, currentUser.uid)
+        setIsFollowingUser(following)
+
+        if (following) {
+          const mutual = await isFollowing(
+            currentUser.uid,
+            profileData.uid
+          )
+          setIsFriend(mutual)
+        }
+      }
+    }
+
+    loadStats()
+  }, [currentUser, profileData, isOwnProfile])
+
+  /* =========================
+     Posts do usuário
+     ========================= */
+  useEffect(() => {
+    if (!profileData?.uid || activeTab !== 'posts') return
+
+    const loadPosts = async () => {
+      setPostsLoading(true)
+      try {
+        const reelsRef = collection(db, 'reels')
+        const q = query(
+          reelsRef,
+          where('userId', '==', profileData.uid),
+          orderBy('createdAt', 'desc'),
+          limit(20)
+        )
+        const snap = await getDocs(q)
+        setUserPosts(
+          snap.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            timestamp: d.data().createdAt?.toMillis() || Date.now()
+          }))
+        )
+      } catch (e) {
+        console.error('Erro ao carregar posts:', e)
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+
+    loadPosts()
+  }, [profileData, activeTab])
+
+  /* =========================
+     Favoritos (apenas próprio)
+     ========================= */
+  useEffect(() => {
+    if (!isOwnProfile || activeTab !== 'favorites') return
+
+    const loadFavorites = async () => {
+      setPostsLoading(true)
+      try {
+        const reelsRef = collection(db, 'reels')
+        const snap = await getDocs(reelsRef)
+
+        const favs = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(r => r.favoritesUsers?.includes(currentUser.uid))
+
+        setFavorites(favs)
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+
+    loadFavorites()
+  }, [activeTab, isOwnProfile, currentUser])
+
+  /* =========================
+     Actions
+     ========================= */
+  const handleFollow = async () => {
+    if (!currentUser || isOwnProfile) return
+
+    if (isFollowingUser) {
+      await unfollowUser(profileData.uid, currentUser.uid)
+      setIsFollowingUser(false)
+      setIsFriend(false)
+      setFollowersCount(v => v - 1)
+    } else {
+      await followUser(profileData.uid, currentUser.uid)
+      setIsFollowingUser(true)
+      setFollowersCount(v => v + 1)
+
+      const mutual = await isFollowing(
+        currentUser.uid,
+        profileData.uid
+      )
+      setIsFriend(mutual)
+    }
+  }
+
+  const handleStartChat = async () => {
+    if (!currentUser || isOwnProfile) return
+    await getOrCreateConversation(currentUser.uid, profileData.uid)
+    navigate('/messages')
+  }
+
+  const handleEditProfile = () => navigate('/u/edit')
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    navigate('/login')
+  }
+
+  /* =========================
+     Viewer
+     ========================= */
+  const handleVideoClick = (video, all) => {
+    setViewerVideos(all)
+    setViewerInitialIndex(all.findIndex(v => v.id === video.id))
+    setViewerOpen(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="profile-loading">
+        <md-circular-progress indeterminate />
+      </div>
+    )
+  }
+
+  /* =========================
+     Render
+     ========================= */
+  return (
+    <>
+      {viewerOpen && (
+        <ProfileVideoViewer
+          videos={viewerVideos}
+          initialIndex={viewerInitialIndex}
+          onClose={() => setViewerOpen(false)}
+        />
+      )}
+
+      <SettingsSheet
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        profileUrl={window.location.href}
+        onLogout={handleLogout}
+      />
+
+      <div className="profile-page">
+        <div className="profile-header">
+          <img
+            src={profileData.avatarBase64}
+            alt=""
+            className="profile-avatar"
+          />
+
+          <h2>{profileData.username}</h2>
+          <p>@{profileData.userHandle}</p>
+
+          <div className="profile-actions">
+            {isOwnProfile ? (
+              <md-filled-tonal-button onClick={handleEditProfile}>
+                Editar perfil
+              </md-filled-tonal-button>
+            ) : (
+              <>
+                <md-filled-button onClick={handleFollow}>
+                  {isFriend
+                    ? 'Amigo'
+                    : isFollowingUser
+                    ? 'Seguindo'
+                    : 'Seguir'}
+                </md-filled-button>
+                <md-filled-tonal-button onClick={handleStartChat}>
+                  Mensagem
+                </md-filled-tonal-button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="posts-grid">
+          {userPosts.map(post => (
+            <VideoThumbnail
+              key={post.id}
+              video={post}
+              onClick={() => handleVideoClick(post, userPosts)}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
           const userRef = doc(db, 'users', currentUser.uid)
           const userSnap = await getDoc(userRef)
           if (userSnap.exists()) {
@@ -564,3 +843,4 @@ export default function Profile({ onMenuClick, drawerOpen }) {
     </>
   )
 }
+
