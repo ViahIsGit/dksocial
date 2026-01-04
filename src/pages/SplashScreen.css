@@ -11,6 +11,16 @@
   position: relative;
 }
 
+/* Camada tonal sutil (Material style) */
+.splash-screen::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background-color: var(--md-sys-color-surface);
+  opacity: 0.35;
+  z-index: 0;
+}
+
 /* Container do logo */
 .splash-content {
   position: relative;
@@ -31,4 +41,3 @@
 
   display: block;
 }
-
