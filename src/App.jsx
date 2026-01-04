@@ -74,18 +74,23 @@ function AppShell() {
   <Route path="/messages" element={<Messages />} />
   <Route path="/music/:id" element={<MusicPage />} />
 
-  {/* Perfil */}
-  <Route path="/u/:handle" element={
-    <Profile
-      onMenuClick={handleMenuClick}
-      drawerOpen={drawerOpen}
-    />
-  } />
+  {/* 👇 PERFIL POR HANDLE */}
+  <Route
+    path="/u/:handle"
+    element={
+      <Profile
+        onMenuClick={handleMenuClick}
+        drawerOpen={drawerOpen}
+      />
+    }
+  />
 
+  {/* 👇 EDITAR PERFIL (fixo) */}
   <Route path="/u/edit" element={<EditProfile />} />
 
   <Route path="/settings" element={<SettingsPage />} />
 
+  {/* ⚠️ SEMPRE POR ÚLTIMO */}
   <Route path="*" element={<Navigate to="/feed" replace />} />
 </Routes>
       </div>
