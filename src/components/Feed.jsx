@@ -127,6 +127,13 @@ export default function Feed() {
             <div className="feed-header">
                 <div className="feed-tabs-container">
                     <button
+                        className={`feed-tab ${activeTab === 'dash' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('dash')}
+                    >
+                        Dash
+                    </button>
+                    <div className="tab-divider"></div>
+                    <button
                         className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
                         onClick={() => setActiveTab('following')}
                     >
@@ -176,4 +183,5 @@ export default function Feed() {
         </div>
     )
                   }
+
 
