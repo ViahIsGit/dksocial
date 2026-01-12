@@ -353,3 +353,205 @@
   place-items: center;
   color: var(--md-sys-color-on-surface-variant);
 }
+
+
+/* =========================
+   Material You – Scrim
+   ========================= */
+.account-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: color-mix(in srgb, #000 32%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+}
+
+/* =========================
+   Bottom Sheet (M3)
+   ========================= */
+.account-sheet {
+  width: 100%;
+  max-width: 460px;
+  background: var(--md-sys-color-surface, #fff);
+  border-radius: 28px 28px 0 0;
+  padding: 16px;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow:
+    0px 8px 24px rgba(0,0,0,.18),
+    0px 4px 8px rgba(0,0,0,.12);
+  animation: sheet-slide-up .28s cubic-bezier(.2,0,0,1);
+}
+
+/* =========================
+   Drag handle (Material)
+   ========================= */
+.account-sheet::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 4px;
+  background: rgba(0,0,0,.25);
+  border-radius: 999px;
+  margin: 0 auto 12px;
+}
+
+/* =========================
+   Header
+   ========================= */
+.account-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 12px;
+}
+
+.account-sheet-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface, #1c1b1f);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-primary, #6750a4);
+  cursor: pointer;
+}
+
+/* =========================
+   Account list
+   ========================= */
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Item */
+.account-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 20px;
+  transition: background .2s ease;
+}
+
+.account-item:hover {
+  background: var(--md-sys-color-surface-container-high, #f3edf7);
+}
+
+/* Left side */
+.account-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Avatar */
+.account-item-left img,
+.account-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--md-sys-color-surface-container, #ece6f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User meta */
+.account-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface, #1c1b1f);
+}
+
+.account-email {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant, #49454f);
+}
+
+/* =========================
+   Action button (M3)
+   ========================= */
+.switch-btn {
+  background: var(--md-sys-color-primary-container, #eaddff);
+  color: var(--md-sys-color-on-primary-container, #21005d);
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, transform .1s ease;
+}
+
+.switch-btn:hover {
+  background: var(--md-sys-color-primary-container, #d0bcff);
+}
+
+.switch-btn:active {
+  transform: scale(.96);
+}
+
+/* =========================
+   Footer buttons
+   ========================= */
+.account-sheet-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.add-account-btn,
+.manage-accounts-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--md-sys-color-surface-container-high, #f3edf7);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary, #6750a4);
+  cursor: pointer;
+  transition: background .2s ease;
+}
+
+.add-account-btn:hover,
+.manage-accounts-btn:hover {
+  background: var(--md-sys-color-surface-container-highest, #e6e0e9);
+}
+
+/* =========================
+   Empty state
+   ========================= */
+.no-accounts {
+  padding: 20px;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant, #49454f);
+  font-size: 14px;
+}
+
+/* =========================
+   Animations
+   ========================= */
+@keyframes sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
