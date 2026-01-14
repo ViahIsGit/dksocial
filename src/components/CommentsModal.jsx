@@ -1,10 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { auth, onAuthStateChanged } from '../firebase/config'
-import { getComments, addComment, likeComment, unlikeComment } from '../services/reels'
- 
-import './CommentsModal.css'
+import * as reelsService from '../services/reels'
+import * as postsService from '../services/posts'
 
-function CommentsModal({ reelId, onClose, currentUser }) {
+import './CommentsModal.css'
+import Avatar from './Avatar'
+
+function CommentsModal({ reelId, postId, onClose, currentUser, collectionName = 'reels', isOpen }) {
+  if (!isOpen) return null
+
+  // Support both reelId (legacy) and postId
+  const targetId = reelId || postId
+
+  // Choose service based on collectionName
+  // Note: DashFeed passes collectionName="posts", defaulting to 'reels'
+  const service = collectionName === 'posts' ? postsService : reelsService
+
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
   const [commentText, setCommentText] = useState('')
@@ -21,8 +32,8 @@ function CommentsModal({ reelId, onClose, currentUser }) {
   }, [currentUser])
 
   useEffect(() => {
-    loadComments()
-  }, [reelId])
+    if (targetId) loadComments()
+  }, [targetId, collectionName])
 
   // Controlar o md-dialog usando os métodos show() e close()
   useEffect(() => {
@@ -38,7 +49,8 @@ function CommentsModal({ reelId, onClose, currentUser }) {
   const loadComments = async () => {
     try {
       setLoading(true)
-      const commentsData = await getComments(reelId)
+      setLoading(true)
+      const commentsData = await service.getComments(targetId)
       setComments(commentsData)
     } catch (error) {
       console.error("Erro ao carregar comentários:", error)
@@ -53,7 +65,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
 
     try {
       setSubmitting(true)
-      await addComment(reelId, { text: commentText.trim() })
+      await service.addComment(targetId, { text: commentText.trim() })
       setCommentText('')
       await loadComments() // Recarregar comentários
     } catch (error) {
@@ -75,9 +87,9 @@ function CommentsModal({ reelId, onClose, currentUser }) {
       const isLiked = comment?.likesUsers?.includes(user.uid)
 
       if (isLiked) {
-        await unlikeComment(reelId, commentId, user.uid)
+        await service.unlikeComment(targetId, commentId, user.uid)
       } else {
-        await likeComment(reelId, commentId, user.uid)
+        await service.likeComment(targetId, commentId, user.uid)
       }
 
       await loadComments() // Recarregar comentários
@@ -137,7 +149,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
               return (
                 <div key={comment.id} className="comment-item">
                   <div className="comment-avatar">
-                    <img src={comment.avatar || '/feed/fizz.png'} alt={comment.username} />
+                    <Avatar src={comment.avatar} size={40} className="comment-avatar-img" />
                   </div>
                   <div className="comment-content">
                     <div className="comment-header">
@@ -165,7 +177,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
           <form className="comments-form" onSubmit={handleSubmitComment}>
             <div className="comment-input-container">
               <div className="comment-input-avatar">
-                <img src={user.photoURL || '/feed/fizz.png'} alt="Você" />
+                <Avatar src={user.photoURL} size={32} className="input-avatar-img" />
               </div>
               <input
                 type="text"
@@ -193,7 +205,7 @@ function CommentsModal({ reelId, onClose, currentUser }) {
         )}
       </div>
 
-      <md-dialog 
+      <md-dialog
         ref={alertDialogRef}
         onClose={() => setAlertDialog({ open: false, title: '', message: '' })}
       >

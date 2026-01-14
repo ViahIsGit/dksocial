@@ -34,20 +34,10 @@
   display: flex;
   position: relative;
   min-height: 0;
-
-  /* 🔑 espaço reservado para BottomNav */
-  padding-bottom: 64px;
-
   /* scroll funciona corretamente */
   overflow: auto;
 
   transition: margin-left 0.3s ease;
-}
-
-/* Espaço para a BottomNav não cobrir conteúdo */
-.app-main > * {
-  padding-bottom: 64px;
-  box-sizing: border-box;
 }
 
 
@@ -122,4 +112,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--md-sys-color-surface-container-highest);
 }
-

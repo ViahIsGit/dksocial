@@ -1,0 +1,321 @@
+/* Container Global */
+.welcome-container {
+    position: relative;
+    height: 100dvh;
+    width: 100%;
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Align content to bottom */
+}
+
+/* Background Particles */
+.welcome-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.welcome-particles span {
+    position: absolute;
+    display: block;
+    width: 4px;
+    height: 4px;
+    background: var(--md-sys-color-primary);
+    border-radius: 50%;
+    opacity: 0;
+    animation: floatUp 15s linear infinite;
+}
+
+.welcome-particles span:nth-child(1) {
+    left: 10%;
+    bottom: -20px;
+    animation-duration: 18s;
+    animation-delay: 0s;
+}
+
+.welcome-particles span:nth-child(2) {
+    left: 20%;
+    bottom: -20px;
+    animation-duration: 22s;
+    animation-delay: 2s;
+    opacity: 0.3;
+    width: 6px;
+    height: 6px;
+}
+
+.welcome-particles span:nth-child(3) {
+    left: 35%;
+    bottom: -20px;
+    animation-duration: 25s;
+    animation-delay: 4s;
+}
+
+.welcome-particles span:nth-child(4) {
+    left: 50%;
+    bottom: -20px;
+    animation-duration: 30s;
+    animation-delay: 1s;
+    opacity: 0.2;
+    width: 3px;
+    height: 3px;
+}
+
+.welcome-particles span:nth-child(5) {
+    left: 65%;
+    bottom: -20px;
+    animation-duration: 20s;
+    animation-delay: 6s;
+}
+
+.welcome-particles span:nth-child(6) {
+    left: 80%;
+    bottom: -20px;
+    animation-duration: 26s;
+    animation-delay: 3s;
+    opacity: 0.4;
+}
+
+.welcome-particles span:nth-child(7) {
+    left: 90%;
+    bottom: -20px;
+    animation-duration: 16s;
+    animation-delay: 5s;
+}
+
+.welcome-particles span:nth-child(8) {
+    left: 15%;
+    bottom: -20px;
+    animation-duration: 28s;
+    animation-delay: 7s;
+}
+
+.welcome-particles span:nth-child(9) {
+    left: 45%;
+    bottom: -20px;
+    animation-duration: 24s;
+    animation-delay: 8s;
+    opacity: 0.3;
+}
+
+.welcome-particles span:nth-child(10) {
+    left: 75%;
+    bottom: -20px;
+    animation-duration: 32s;
+    animation-delay: 2s;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.4;
+    }
+
+    90% {
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: translateY(-110vh) translateX(30px);
+        opacity: 0;
+    }
+}
+
+/* Rotating Shape (Top Right) */
+.welcome-blob-container {
+    position: absolute;
+    top: -20%;
+    right: -40%;
+    width: 150vw;
+    /* Large enough to cover corner */
+    height: 100vw;
+    max-width: 700px;
+    max-height: 700px;
+    z-index: 0;
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+}
+
+/* SVG Specific Styles */
+.welcome-blob-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.welcome-blob-svg.layer-1 {
+    animation: blob-spin 40s linear infinite;
+    opacity: 0.5;
+}
+
+.welcome-blob-svg.layer-2 {
+    width: 90%;
+    height: 90%;
+    animation: blob-spin-reverse 60s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes blob-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blob-spin-reverse {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+/* Bottom Bar Area */
+.welcome-bottom-bar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    /* Text bottom, Button bottom */
+    justify-content: space-between;
+    padding: 32px;
+    padding-bottom: 48px;
+    /* Extra padding for safety */
+    width: 100%;
+    background: radial-gradient(circle at bottom left, rgba(var(--md-sys-color-primary-rgb), 0.1) 0%, transparent 50%);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.welcome-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Left Text */
+.welcome-text {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Outfit', sans-serif;
+    animation: slideUp 0.6s ease-out;
+}
+
+.welcome-text span {
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.2;
+}
+
+.welcome-text .brand-name {
+    font-size: 38px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Theme Chooser */
+.theme-chooser {
+    display: flex;
+    gap: 8px;
+    animation: slideUp 0.7s ease-out;
+}
+
+.theme-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--md-sys-color-on-surface);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    padding: 0;
+}
+
+.theme-dot:hover {
+    transform: scale(1.1);
+    border-color: var(--md-sys-color-primary);
+}
+
+.theme-dot:active {
+    transform: scale(0.95);
+}
+
+/* Continue Button with Text */
+.welcome-btn-continue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 56px;
+    padding: 0 24px;
+    border-radius: 16px;
+    background: transparent;
+    color: var(--md-sys-color-primary);
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.welcome-btn-continue:hover {
+    transform: scale(1.02);
+}
+
+.welcome-btn-continue:active {
+    transform: scale(0.98);
+}
+
+.welcome-btn-continue .material-symbols-outlined {
+    font-size: 20px;
+}
+
+/* Animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    60% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

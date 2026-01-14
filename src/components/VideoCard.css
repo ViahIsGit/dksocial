@@ -218,15 +218,17 @@
   flex-direction: column;
   align-items: center;
 }
+
 .video-avatar {
   width: 44px;
   height: 44px;
 
-  border-radius: 50%;
-  overflow: hidden;
+  /* border-radius: 50%; removed */
+  /* overflow: hidden; removed */
 
-  background: var(--md-sys-color-surface-container);
-  border: 2px solid var(--md-sys-color-primary);
+  background: transparent;
+  /* Changed from surface-container */
+  /* border handling by component */
 
   box-shadow: var(--md-sys-elevation-1);
 }
@@ -236,6 +238,7 @@
   height: 100%;
   object-fit: cover;
 }
+
 .video-follow-badge {
   position: absolute;
   bottom: -6px;
@@ -285,11 +288,9 @@
   padding: 8px 6px;
   border-radius: 999px;
 
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-surface-container-high) 75%,
-    transparent
-  );
+  background: color-mix(in srgb,
+      var(--md-sys-color-surface-container-high) 75%,
+      transparent);
 
   backdrop-filter: blur(20px);
   box-shadow: var(--md-sys-elevation-2);

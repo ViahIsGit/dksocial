@@ -4,6 +4,7 @@ import { likeReel, unlikeReel, favoriteReel, unfavoriteReel, shareReel, followUs
 import { useLayout } from '../context/LayoutContext'
 import CommentsModal from './CommentsModal'
 import ShareModal from './ShareModal'
+import Avatar from './Avatar'
 import './VideoCard.css'
 
 // --- HOOK DE GESTOS PERSONALIZADO (Substitui react-swipe/react-swipeable) ---
@@ -60,7 +61,7 @@ const useSmartGestures = ({ onDoubleTap, onTap, onSwipeLeft, onSwipeRight }) => 
 function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPlayRequest }) {
   const navigate = useNavigate()
   const { setBottomNavHidden } = useLayout()
-  
+
   // Estados de Interação
   const [isLiked, setIsLiked] = useState(video.isLiked || false)
   const [isFavorited, setIsFavorited] = useState(video.isFavorited || false)
@@ -68,12 +69,12 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   const [shares, setShares] = useState(video.shares || 0)
   const [isFollowingUser, setIsFollowingUser] = useState(false)
   const [isFriend, setIsFriend] = useState(false)
-  
+
   // Estados de UI
   const [showComments, setShowComments] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [alertDialog, setAlertDialog] = useState({ open: false, title: '', message: '' })
-  
+
   // Estados do Player
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(isFirst ? true : false)
@@ -82,7 +83,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   const [currentTime, setCurrentTime] = useState(0)
   const [isBuffering, setIsBuffering] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  
+
   // Refs
   const videoRef = useRef(null)
   const savedTimeRef = useRef(0) // Armazena o tempo quando o vídeo é desmontado
@@ -119,7 +120,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   }, [isActive])
 
   // --- Handlers do Vídeo ---
-  
+
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration)
@@ -143,7 +144,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     setIsPlaying(true) // Mantém estado de playing para loop
     if (videoRef.current) {
       videoRef.current.currentTime = 0
-      videoRef.current.play().catch(() => {})
+      videoRef.current.play().catch(() => { })
     }
   }
 
@@ -209,7 +210,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   }
 
   // --- Configuração dos Gestos (Substituindo listeners manuais) ---
-  
+
   const gestures = useSmartGestures({
     onDoubleTap: (e) => {
       // Animação de coração poderia ser disparada aqui
@@ -217,9 +218,9 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
     },
     onTap: (e) => {
       // Ignora toques nos controles ou info
-      if (e.target.closest('.video-actions-right') || 
-          e.target.closest('.video-info') || 
-          e.target.closest('.video-controls-container')) {
+      if (e.target.closest('.video-actions-right') ||
+        e.target.closest('.video-info') ||
+        e.target.closest('.video-controls-container')) {
         return
       }
       togglePlay()
@@ -327,8 +328,8 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
   // --- RENDERIZAÇÃO ---
 
   return (
-    <div 
-      className="video-card" 
+    <div
+      className="video-card"
       data-video-card-id={video.id}
       {...gestures} // Aplica os gestos de Swipe e Tap aqui
     >
@@ -352,7 +353,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
                 onCanPlay={() => {
                   setIsBuffering(false)
                   // Reaplica velocidade se necessário
-                  if(videoRef.current) videoRef.current.playbackRate = playbackRate
+                  if (videoRef.current) videoRef.current.playbackRate = playbackRate
                 }}
                 onEnded={handleEnded}
                 // Previne menu de contexto padrão
@@ -360,8 +361,8 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
               />
             ) : (
               // Placeholder leve quando fora de vista
-              <img 
-                src={video.thumbnail || video.videoUrl} 
+              <img
+                src={video.thumbnail || video.videoUrl}
                 className="custom-video-player" // Mesma classe para manter layout
                 style={{ objectFit: 'cover' }}
                 alt="Thumbnail"
@@ -419,7 +420,7 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
               alt={`Slide ${currentSlide}`}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            
+
             <div className="slideshow-indicators" style={{
               position: 'absolute', bottom: '100px', left: 0, width: '100%',
               display: 'flex', justifyContent: 'center', gap: '4px', zIndex: 15
@@ -433,20 +434,20 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
                 }} />
               ))}
             </div>
-            
+
             {/* Zonas de navegação manuais (fallback para clique) */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '20%', height: '100%', zIndex: 10 }}
-                 onClick={(e) => { e.stopPropagation(); setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length); }} />
+              onClick={(e) => { e.stopPropagation(); setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length); }} />
             <div style={{ position: 'absolute', top: 0, right: 0, width: '20%', height: '100%', zIndex: 10 }}
-                 onClick={(e) => { e.stopPropagation(); setCurrentSlide(prev => (prev + 1) % slides.length); }} />
+              onClick={(e) => { e.stopPropagation(); setCurrentSlide(prev => (prev + 1) % slides.length); }} />
           </div>
         )}
       </div>
 
       {/* Interface Lateral (Ações) */}
       <div className="video-actions-right">
-        <div className="video-avatar">
-          <img src={video.avatar} alt={video.username} />
+        <div className="video-avatar" onClick={(e) => { e.stopPropagation(); navigate(`/u/${video.userHandle || video.userId}`); }}>
+          <Avatar src={video.avatar} size={48} className="video-avatar-img" />
           {currentUser && video.userId && video.userId !== currentUser.uid && !isFollowingUser && !isFriend && (
             <button className="video-follow-badge" onClick={handleFollow}><md-icon>add</md-icon></button>
           )}
@@ -497,11 +498,11 @@ function VideoCard({ video, currentUser, isFirst = false, isActive = false, onPl
       {/* Modais e Dialogs */}
       {showComments && <CommentsModal reelId={video.reelId} onClose={() => setShowComments(false)} currentUser={currentUser} />}
       {showShareModal && (
-        <ShareModal 
-          video={video} 
-          onClose={() => { setShowShareModal(false); setBottomNavHidden(false); }} 
-          currentUser={currentUser} 
-          onShare={() => { shareReel(video.reelId, currentUser.uid).catch(console.error); setShares(s => s + 1); }} 
+        <ShareModal
+          video={video}
+          onClose={() => { setShowShareModal(false); setBottomNavHidden(false); }}
+          currentUser={currentUser}
+          onShare={() => { shareReel(video.reelId, currentUser.uid).catch(console.error); setShares(s => s + 1); }}
         />
       )}
 

@@ -6,11 +6,14 @@ import BottomNav from './components/BottomNav'
 import Feed from './components/Feed'
 import Messages from './components/Messages'
 import Camera from './components/Camera'
+import Notifications from './pages/Notifications'
 import MusicPage from './pages/MusicPage'
 
 import { LayoutProvider, useLayout } from './context/LayoutContext'
 import { MessagesProvider } from './context/MessagesContext'
 import { ThemeProvider } from './context/ThemeContext'
+
+import PostDetails from './pages/PostDetails'
 
 import SplashScreen from './pages/SplashScreen'
 import Login from './pages/Login'
@@ -43,29 +46,30 @@ function AppShell({ profileData }) {
   const handleDrawerClose = () => setDrawerOpen(false)
 
   const handleTabChange = (tabId) => {
-  if (tabId === 'profile') {
-    if (profileData?.userHandle) {
-      navigate(`/u/${profileData.userHandle}`)
-    } else {
-      navigate('/feed')
+    if (tabId === 'profile') {
+      if (profileData?.userHandle) {
+        navigate(`/u/${profileData.userHandle}`)
+      } else {
+        navigate('/feed')
+      }
+      return
     }
-    return
-  }
 
-  const routes = {
-    feed: '/feed',
-    messages: '/messages',
-    camera: '/camera'
-  }
+    const routes = {
+      feed: '/feed',
+      messages: '/messages',
+      camera: '/camera',
+      notifications: '/notifications'
+    }
 
-  if (routes[tabId]) navigate(routes[tabId])
-}
+    if (routes[tabId]) navigate(routes[tabId])
+  }
 
   const handleFABClick = () => setIsCreateModalOpen(true)
 
   const getActiveTab = () => {
     const path = location.pathname
-    if (path === '/feed') return 'feed'
+    if (path === '/feed' || path === '/dash') return 'feed'
     if (path === '/messages') return 'messages'
     if (path === '/camera') return 'camera'
     if (path.startsWith('/u')) return 'profile'
@@ -77,31 +81,34 @@ function AppShell({ profileData }) {
       <NavigationDrawer isOpen={drawerOpen} onClose={handleDrawerClose} />
 
       <div className="app-main">
-      <Routes>
-  <Route path="/download" element={<Download />} />
-  <Route path="/feed" element={<Feed />} />
-  <Route path="/messages" element={<Messages />} />
-  <Route path="/music/:id" element={<MusicPage />} />
+        <Routes>
+          <Route path="/download" element={<Download />} />
+          <Route path="/post/:id" element={<PostDetails />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/dash" element={<Feed initialTab="dash" />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/music/:id" element={<MusicPage />} />
 
-  {/* 👇 PERFIL POR HANDLE */}
-  <Route
-    path="/u/:handle"
-    element={
-      <Profile
-        onMenuClick={handleMenuClick}
-        drawerOpen={drawerOpen}
-      />
-    }
-  />
+          {/* 👇 PERFIL POR HANDLE */}
+          <Route
+            path="/u/:handle"
+            element={
+              <Profile
+                onMenuClick={handleMenuClick}
+                drawerOpen={drawerOpen}
+              />
+            }
+          />
 
-  {/* 👇 EDITAR PERFIL (fixo) */}
-  <Route path="/u/edit" element={<EditProfile />} />
+          {/* 👇 EDITAR PERFIL (fixo) */}
+          <Route path="/u/edit" element={<EditProfile />} />
 
-  <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
 
-  {/* ⚠️ SEMPRE POR ÚLTIMO */}
-  <Route path="*" element={<Navigate to="/feed" replace />} />
-</Routes>
+          {/* ⚠️ SEMPRE POR ÚLTIMO */}
+          <Route path="*" element={<Navigate to="/feed" replace />} />
+        </Routes>
       </div>
 
       <CreateModal
@@ -115,6 +122,7 @@ function AppShell({ profileData }) {
           activeTab={getActiveTab()}
           onTabChange={handleTabChange}
           onFABClick={handleFABClick}
+          showFab={location.pathname !== '/dash'}
         />
       )}
     </div>
@@ -156,6 +164,15 @@ function AuthRoutes({ setAuthView }) {
   )
 }
 
+import { useFcm } from './hooks/useFcm'
+
+/* ===============================
+   🚀 App Root
+================================ */
+import Welcome from './pages/Welcome'
+
+// ... existing imports
+
 /* ===============================
    🚀 App Root
 ================================ */
@@ -166,6 +183,14 @@ export default function App() {
   const [authView, setAuthView] = useState('login')
   const [profileStatus, setProfileStatus] = useState('idle')
   const [profileData, setProfileData] = useState(null)
+
+  // State for Welcome Screen
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(() => {
+    return localStorage.getItem('hasSeenWelcome') === 'true'
+  })
+
+  // Initialize FCM
+  useFcm(user)
 
   const loadProfileData = useCallback(async (currentUser) => {
     if (!currentUser) {
@@ -222,6 +247,11 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [])
 
+  const handleWelcomeComplete = () => {
+    setHasSeenWelcome(true)
+    localStorage.setItem('hasSeenWelcome', 'true')
+  }
+
   const shouldShowSplash = !authReady || !splashDone
 
   return (
@@ -241,8 +271,10 @@ export default function App() {
                   await signOut(auth)
                 }}
               >
-                <AppShell />
+                <AppShell profileData={profileData} />
               </ProtectedRoute>
+            ) : !hasSeenWelcome ? (
+              <Welcome onComplete={handleWelcomeComplete} />
             ) : (
               <AuthRoutes setAuthView={setAuthView} />
             )}

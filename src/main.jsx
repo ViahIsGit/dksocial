@@ -4,6 +4,9 @@ import App from './App.jsx'
 import './index.css'
 
 // Importar Material Web Components
+import 'mdui/mdui.css';
+import 'mdui';
+
 import '@material/web/button/filled-button.js'
 import '@material/web/button/outlined-button.js'
 import '@material/web/button/text-button.js'

@@ -5,6 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { useLayout } from '../context/LayoutContext'
 import { sourceColorFromImage, hexFromArgb, themeFromSourceColor, argbFromHex } from '@material/material-color-utilities'
 import './EditProfile.css'
+import Avatar from './Avatar'
 
 function compressImageToBase64(file, maxSize = 512, quality = 0.75) {
     return new Promise((resolve, reject) => {
@@ -209,7 +210,7 @@ export default function EditProfile() {
                                     style={{ display: 'none' }}
                                 />
                                 {avatarPreview ? (
-                                    <img src={avatarPreview} alt="Avatar" className="avatar-image" />
+                                    <Avatar src={avatarPreview} size={120} className="avatar-image" />
                                 ) : (
                                     <div className="avatar-placeholder">
                                         <md-icon>add_a_photo</md-icon>

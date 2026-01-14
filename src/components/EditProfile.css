@@ -27,6 +27,10 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    flex-wrap: nowrap;
+    /* Prevent wrapping */
+    gap: 8px;
+    /* Consistent gap */
 }
 
 .edit-profile-top-bar h1 {
@@ -34,7 +38,13 @@
     font-family: var(--md-sys-typescale-title-large-font);
     font-size: var(--md-sys-typescale-title-large-size);
     font-weight: var(--md-sys-typescale-title-large-weight);
-    margin: 0 0 0 1rem;
+    margin: 0;
+    /* Removed left margin, relying on gap */
+    white-space: nowrap;
+    text-align: right;
+    /* Title to the right */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .top-bar-actions {
@@ -72,9 +82,9 @@
 .avatar-image {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
+    /* border-radius: 50%; removed */
     object-fit: cover;
-    border: 4px solid var(--md-sys-color-surface-container-low);
+    /* border: 4px solid ... removed */
 }
 
 .avatar-placeholder {

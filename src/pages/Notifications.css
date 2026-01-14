@@ -1,0 +1,58 @@
+.notifications-page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--mdui-color-surface);
+    padding-bottom: 80px;
+    /* Space for bottom nav if present */
+}
+
+.notifications-page.loading {
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+}
+
+.notifications-header {
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--mdui-color-surface);
+}
+
+.notifications-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--mdui-color-on-surface);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--mdui-color-on-surface-variant);
+}
+
+.notification-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-type-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background-color: var(--mdui-color-primary-container);
+    border-radius: 50%;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-thumbnail img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}

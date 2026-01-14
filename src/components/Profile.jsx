@@ -20,6 +20,7 @@ import ProfileVideoViewer from './ProfileVideoViewer'
 import VideoThumbnail from './VideoThumbnail'
 import SettingsSheet from './SettingsSheet'
 import './Profile.css'
+import Avatar from './Avatar'
 
 export default function Profile({ onMenuClick, drawerOpen }) {
   const { handle } = useParams()
@@ -40,8 +41,77 @@ export default function Profile({ onMenuClick, drawerOpen }) {
 
   const [userPosts, setUserPosts] = useState([])
   const [favorites, setFavorites] = useState([])
+  const [followingList, setFollowingList] = useState([])
+  const [followersList, setFollowersList] = useState([])
   const [activeTab, setActiveTab] = useState('posts')
+
   const [postsLoading, setPostsLoading] = useState(false)
+  const [dashPosts, setDashPosts] = useState([])
+
+  // ... (previous useEffects)
+
+  // ... (previous useEffects)
+
+  /* =========================
+     Fetch Dash Posts
+     ========================= */
+  useEffect(() => {
+    if (!profileData?.uid || activeTab !== 'dash') return
+
+    const loadDashPosts = async () => {
+      setPostsLoading(true)
+      try {
+        const q = query(
+          collection(db, 'posts'),
+          where('userId', '==', profileData.uid),
+          orderBy('createdAt', 'desc')
+        )
+        const snap = await getDocs(q)
+        setDashPosts(snap.docs.map(d => ({ id: d.id, ...d.data(), user: profileData })))
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setPostsLoading(false)
+      }
+    }
+    loadDashPosts()
+  }, [profileData, activeTab])
+
+  /* =========================
+     Fetch Following/Followers Users
+     ========================= */
+  useEffect(() => {
+    if (!profileData?.uid) return
+
+    // Only fetch if tab is active
+    if (activeTab === 'following') {
+      const loadFollowing = async () => {
+        const ref = collection(db, 'followers', profileData.uid, 'userFollowing')
+        const snap = await getDocs(ref)
+        const users = []
+        for (const d of snap.docs) {
+          const uSnap = await getDoc(doc(db, 'users', d.id))
+          if (uSnap.exists()) users.push({ id: d.id, ...uSnap.data() })
+        }
+        setFollowingList(users)
+      }
+      loadFollowing()
+    }
+
+    if (activeTab === 'followers') {
+      const loadFollowers = async () => {
+        const ref = collection(db, 'followers', profileData.uid, 'userFollowers')
+        const snap = await getDocs(ref)
+        const users = []
+        for (const d of snap.docs) {
+          const uSnap = await getDoc(doc(db, 'users', d.id))
+          if (uSnap.exists()) users.push({ id: d.id, ...uSnap.data() })
+        }
+        setFollowersList(users)
+      }
+      loadFollowers()
+    }
+  }, [profileData?.uid, activeTab])
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
@@ -268,579 +338,331 @@ export default function Profile({ onMenuClick, drawerOpen }) {
       />
 
       <div className="profile-page">
-        <div className="profile-header">
-          <img
-            src={profileData.avatarBase64}
-            alt=""
-            className="profile-avatar"
-          />
-
-          <h2>{profileData.username}</h2>
-          <p>@{profileData.userHandle}</p>
-
-          <div className="profile-actions">
-            {isOwnProfile ? (
-              <md-filled-tonal-button onClick={handleEditProfile}>
-                Editar perfil
-              </md-filled-tonal-button>
-            ) : (
-              <>
-                <md-filled-button onClick={handleFollow}>
-                  {isFriend
-                    ? 'Amigo'
-                    : isFollowingUser
-                    ? 'Seguindo'
-                    : 'Seguir'}
-                </md-filled-button>
-                <md-filled-tonal-button onClick={handleStartChat}>
-                  Mensagem
-                </md-filled-tonal-button>
-              </>
-            )}
-          </div>
+        {/* Cover / Header Background */}
+        <div className="profile-cover">
+          <div className="profile-cover-gradient"></div>
         </div>
 
-        <div className="posts-grid">
-          {userPosts.map(post => (
-            <VideoThumbnail
-              key={post.id}
-              video={post}
-              onClick={() => handleVideoClick(post, userPosts)}
-            />
-          ))}
-        </div>
-      </div>
-    </>
-  )
-}
-          const userRef = doc(db, 'users', currentUser.uid)
-          const userSnap = await getDoc(userRef)
-          if (userSnap.exists()) {
-            setProfileData({
-              ...userSnap.data(),
-              uid: currentUser.uid,
-              email: currentUser.email,
-              fullName: userSnap.data().fullName || currentUser.displayName || ''
-            })
-          } else {
-            setProfileData({
-              uid: currentUser.uid,
-              email: currentUser.email,
-              fullName: currentUser.displayName || ''
-            })
-          }
-        } catch (error) {
-          console.error('Erro ao carregar perfil:', error)
-        }
-      } else {
-        navigate('/login')
-      }
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [navigate])
-
-  // Carregar estatísticas de follow
-  useEffect(() => {
-    if (!user || !profileData) return
-
-    const loadFollowStats = async () => {
-      try {
-        // Contar seguidores
-        const followersRef = collection(db, 'followers', profileData.uid, 'userFollowers')
-        const followersSnapshot = await getDocs(followersRef)
-        setFollowersCount(followersSnapshot.size)
-
-        // Contar seguindo
-        const followingRef = collection(db, 'followers', profileData.uid, 'userFollowing')
-        const followingSnapshot = await getDocs(followingRef)
-        setFollowingCount(followingSnapshot.size)
-
-        // Verificar se está seguindo (se não for o próprio perfil)
-        if (!isOwnProfile && user.uid !== profileData.uid) {
-          const following = await isFollowing(profileData.uid, user.uid)
-          setIsFollowingUser(following)
-
-          // Verificar se são amigos
-          if (following) {
-            const mutualFollow = await isFollowing(user.uid, profileData.uid)
-            setIsFriend(mutualFollow)
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error)
-      }
-    }
-
-    loadFollowStats()
-  }, [user, profileData, isOwnProfile])
-
-  // Carregar posts do usuário
-  useEffect(() => {
-    if (!profileData?.uid || activeTab !== 'posts') return
-
-    const loadUserPosts = async () => {
-      setPostsLoading(true)
-      try {
-        const reelsRef = collection(db, 'reels')
-        const q = query(
-          reelsRef,
-          where('userId', '==', profileData.uid),
-          orderBy('createdAt', 'desc'),
-          limit(20)
-        )
-        const snapshot = await getDocs(q)
-        const posts = snapshot.docs.map(doc => {
-          const data = doc.data()
-          return {
-            id: doc.id,
-            ...data,
-            timestamp: data.createdAt?.toMillis() || Date.now(),
-            username: profileData?.username || 'Usuário',
-            avatar: profileData?.avatarBase64 || ''
-          }
-        })
-        setUserPosts(posts)
-      } catch (error) {
-        console.error('Erro ao carregar posts:', error)
-        // Se der erro com orderBy, tentar sem orderBy
-        try {
-          const reelsRef = collection(db, 'reels')
-          const q = query(
-            reelsRef,
-            where('userId', '==', profileData.uid),
-            limit(20)
-          )
-          const snapshot = await getDocs(q)
-          const posts = snapshot.docs.map(doc => {
-            const data = doc.data()
-            return {
-              id: doc.id,
-              ...data,
-              timestamp: data.createdAt?.toMillis() || Date.now(),
-              username: profileData?.username || 'Usuário',
-              avatar: profileData?.avatarBase64 || ''
-            }
-          }).sort((a, b) => b.timestamp - a.timestamp)
-          setUserPosts(posts)
-        } catch (err) {
-          console.error('Erro ao carregar posts (fallback):', err)
-        }
-      } finally {
-        setPostsLoading(false)
-      }
-    }
-
-    loadUserPosts()
-  }, [profileData?.uid, profileData?.username, profileData?.avatarBase64, activeTab])
-
-  // Carregar favoritos
-  useEffect(() => {
-    if (!user || !profileData || activeTab !== 'favorites') return
-
-    const loadFavorites = async () => {
-      setPostsLoading(true)
-      try {
-        const reelsRef = collection(db, 'reels')
-        const snapshot = await getDocs(reelsRef)
-        const allReels = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          timestamp: doc.data().createdAt?.toMillis() || Date.now()
-        }))
-
-        // Filtrar apenas os que o usuário favoritou
-        const favoritedReels = allReels.filter(reel =>
-          reel.favoritesUsers?.includes(user.uid)
-        )
-
-        // Buscar informações dos usuários para cada reel
-        const reelsWithUserInfo = await Promise.all(
-          favoritedReels.map(async (reel) => {
-            try {
-              const userRef = doc(db, 'users', reel.userId)
-              const userSnap = await getDoc(userRef)
-              if (userSnap.exists()) {
-                const userData = userSnap.data()
-                return {
-                  ...reel,
-                  username: userData.username || 'Usuário',
-                  avatar: userData.avatarBase64 || ''
-                }
-              }
-              return {
-                ...reel,
-                username: 'Usuário',
-                avatar: ''
-              }
-            } catch (err) {
-              return {
-                ...reel,
-                username: 'Usuário',
-                avatar: ''
-              }
-            }
-          })
-        )
-
-        setFavorites(reelsWithUserInfo.sort((a, b) => b.timestamp - a.timestamp))
-      } catch (error) {
-        console.error('Erro ao carregar favoritos:', error)
-      } finally {
-        setPostsLoading(false)
-      }
-    }
-
-    if (isOwnProfile) {
-      loadFavorites()
-    }
-  }, [user, profileData, activeTab, isOwnProfile])
-
-  const handleFollow = async () => {
-    if (!user || isOwnProfile) return
-
-    try {
-      if (isFollowingUser) {
-        await unfollowUser(profileData.uid, user.uid)
-        setIsFollowingUser(false)
-        setIsFriend(false)
-        setFollowersCount(prev => Math.max(0, prev - 1))
-      } else {
-        await followUser(profileData.uid, user.uid)
-        setIsFollowingUser(true)
-        setFollowersCount(prev => prev + 1)
-        // Verificar se agora são amigos
-        const mutualFollow = await isFollowing(user.uid, profileData.uid)
-        setIsFriend(mutualFollow)
-      }
-    } catch (error) {
-      console.error('Erro ao seguir/deixar de seguir:', error)
-    }
-  }
-
-  const handleStartChat = async () => {
-    if (!user || !profileData || isOwnProfile) return
-
-    try {
-      const conversationId = await getOrCreateConversation(user.uid, profileData.uid)
-      if (conversationId) {
-        navigate('/messages')
-      }
-    } catch (error) {
-      console.error('Erro ao iniciar chat:', error)
-    }
-  }
-
-  const handleEditProfile = () => {
-    navigate('/u/edit')
-  }
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth)
-      window.localStorage.removeItem('logged')
-      navigate('/login')
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error)
-    }
-  }
-
-  const formatNumber = (num) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-    return num.toString()
-  }
-
-  const handleVideoClick = (video, allVideos) => {
-    const formattedVideos = allVideos.map(v => ({
-      id: v.id,
-      username: v.username || profileData?.username || 'Usuário',
-      avatar: v.avatar || profileData?.avatarBase64 || '',
-      thumbnail: v.thumbnailUrl || v.videoUrl,
-      videoUrl: v.videoUrl,
-      description: v.desc || v.description || '',
-      duration: v.duration || '0:00',
-      timestamp: v.timestamp || Date.now(),
-      likes: v.likesUsers?.length || 0,
-      comments: v.comments || 0,
-      shares: 0,
-      isLiked: user ? v.likesUsers?.includes(user.uid) : false,
-      isFavorited: user ? v.favoritesUsers?.includes(user.uid) : false,
-      likesUsers: v.likesUsers || [],
-      reelId: v.id,
-      userId: v.userId || profileData?.uid,
-      currentUser: user
-    }))
-    const index = formattedVideos.findIndex(v => v.id === video.id)
-    setViewerVideos(formattedVideos)
-    setViewerInitialIndex(index >= 0 ? index : 0)
-    setViewerOpen(true)
-  }
-
-  const handleCloseViewer = () => {
-    setViewerOpen(false)
-    setViewerVideos([])
-    setViewerInitialIndex(0)
-  }
-
-  if (loading) {
-    return (
-      <div className="profile-page">
-        <div className="profile-loading">
-          <md-circular-progress indeterminate></md-circular-progress>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <>
-      {viewerOpen && (
-        <ProfileVideoViewer
-          videos={viewerVideos}
-          initialIndex={viewerInitialIndex}
-          onClose={handleCloseViewer}
-        />
-      )}
-
-      <SettingsSheet
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        profileUrl={window.location.href}
-        onLogout={handleLogout}
-        anchor="right"
-      />
-
-      <div className="profile-page">
-        <div className="profile-container">
-          {/* Cover Area - New for Expressive Design */}
-          <div
-            className="profile-cover"
-            style={
-              profileData?.bannerColor
-                ? { background: `linear-gradient(135deg, ${profileData.bannerColor} 0%, var(--md-sys-color-surface-container-low) 100%)` }
-                : {}
-            }
+        {/* Menu Button (Top Right) */}
+        {isOwnProfile && (
+          <button
+            className="profile-menu-button"
+            onClick={() => setIsSettingsOpen(true)}
           >
-            <div className="profile-cover-gradient" style={profileData?.bannerColor ? { background: 'transparent' } : {}}></div>
+            <span className="material-symbols-outlined">more_horiz</span>
+          </button>
+        )}
+
+        <div className="profile-content-wrapper">
+          <div className="profile-header-section">
+            <div className="profile-avatar-container">
+              {profileData.avatarBase64 ? (
+                <Avatar
+                  src={profileData.avatarBase64}
+                  size={160} // Increased size as requested
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar-placeholder">
+                  <span className="material-symbols-outlined">account_circle</span>
+                </div>
+              )}
+            </div>
+
+            <div className="profile-title-section">
+              <h1 className="profile-name">{profileData.username}</h1>
+              <div className="profile-handle">@{profileData.userHandle}</div>
+              {/* Bio would go here if available in data */}
+              {profileData.bio && (
+                <p className="profile-bio-text">{profileData.bio}</p>
+              )}
+            </div>
+
+            <div className="profile-actions">
+              {isOwnProfile ? (
+                <button className="m3-btn tonal" onClick={handleEditProfile}>
+                  <span className="material-symbols-outlined">edit</span>
+                  Editar perfil
+                </button>
+              ) : (
+                <>
+                  <button
+                    className={`m3-btn ${isFollowingUser ? 'outlined' : 'filled'}`}
+                    onClick={handleFollow}
+                  >
+                    {isFriend ? (
+                      <>
+                        <span className="material-symbols-outlined">check</span>
+                        Amigos
+                      </>
+                    ) : isFollowingUser ? (
+                      <>
+                        <span className="material-symbols-outlined">check</span>
+                        Seguindo
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined">add</span>
+                        Seguir
+                      </>
+                    )}
+                  </button>
+                  <button className="m3-btn tonal" onClick={handleStartChat}>
+                    <span className="material-symbols-outlined">chat_bubble</span>
+                    Mensagem
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          {isOwnProfile && (
-            <div className="profile-menu-button">
-              <md-filled-icon-button onClick={() => setIsSettingsOpen(true)}>
-                <md-icon>menu</md-icon>
-              </md-filled-icon-button>
+          <div className="profile-stats">
+            <div className="stat-item" onClick={() => {
+              setActiveTab('followers')
+              document.getElementById('view-followers')?.scrollIntoView({ behavior: 'smooth' })
+            }}>
+              <span className="stat-number">{followersCount}</span>
+              <span className="stat-label">Seguidores</span>
             </div>
-          )}
+            <div className="stat-item" onClick={() => {
+              setActiveTab('following')
+              document.getElementById('view-following')?.scrollIntoView({ behavior: 'smooth' })
+            }}>
+              <span className="stat-number">{followingCount}</span>
+              <span className="stat-label">Seguindo</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">0</span>
+              <span className="stat-label">Curtidas</span>
+            </div>
+          </div>
 
-          <div className="profile-content-wrapper">
-            {/* Header do Perfil */}
-            <div className="profile-header-section">
-              <div className="profile-avatar-container">
-                {profileData?.avatarBase64 ? (
-                  <img
-                    src={profileData.avatarBase64}
-                    alt="Avatar"
-                    className="profile-avatar"
-                  />
+          <div className="profile-tabs-container">
+            <div className="profile-tabs">
+              <button
+                className={`profile-tab ${activeTab === 'posts' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('posts')
+                  document.getElementById('view-posts')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span className="material-symbols-outlined">grid_view</span>
+                Posts
+              </button>
+              <button
+                className={`profile-tab ${activeTab === 'dash' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('dash')
+                  document.getElementById('view-dash')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span className="material-symbols-outlined">article</span>
+                Dash
+              </button>
+              {isOwnProfile && (
+                <button
+                  className={`profile-tab ${activeTab === 'favorites' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('favorites')
+                    document.getElementById('view-favorites')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                >
+                  <span className="material-symbols-outlined">bookmark</span>
+                  Salvos
+                </button>
+              )}
+              <button
+                className={`profile-tab ${activeTab === 'following' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('following')
+                  document.getElementById('view-following')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span className="material-symbols-outlined">group</span>
+                Seguindo
+              </button>
+              <button
+                className={`profile-tab ${activeTab === 'followers' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('followers')
+                  document.getElementById('view-followers')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                <span className="material-symbols-outlined">groups</span>
+                Seguidores
+              </button>
+            </div>
+          </div>
+
+          {/* SWIPEABLE CONTAINER */}
+          <div
+            className="profile-views-container"
+            onScroll={(e) => {
+              const el = e.target
+              const scrollLeft = el.scrollLeft
+              const width = el.offsetWidth
+              // Simple debiting logic / snap detection
+              const index = Math.round(scrollLeft / width)
+
+              const tabs = isOwnProfile
+                ? ['posts', 'dash', 'favorites', 'following', 'followers']
+                : ['posts', 'dash', 'following', 'followers']
+
+              const currentTab = tabs[index]
+              if (currentTab && currentTab !== activeTab) {
+                // Update tab pill without triggering scroll (loop prevention needs care)
+                // Currently simple state set is fine as scrollIntoView is on click
+                setActiveTab(currentTab)
+              }
+            }}
+          >
+            {/* VIEW: POSTS */}
+            <div id="view-posts" className="profile-view-section">
+              <div className="posts-grid">
+                {postsLoading ? (
+                  <div className="loading-posts">
+                    <span className="material-symbols-outlined spin">progress_activity</span>
+                  </div>
+                ) : userPosts.length > 0 ? (
+                  userPosts.map(post => (
+                    <div key={post.id} className="profile-post-card" onClick={() => handleVideoClick(post, userPosts)}>
+                      {post.thumbnailUrl ? (
+                        <img src={post.thumbnailUrl} loading="lazy" alt="" />
+                      ) : (
+                        <video src={post.videoUrl} preload="metadata" />
+                      )}
+                      <div className="profile-video-views">
+                        <span className="material-symbols-outlined">play_arrow</span>
+                        {post.views || 0}
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <div className="profile-avatar-placeholder">
-                    <md-icon>account_circle</md-icon>
+                  <div className="empty-state">
+                    <span className="material-symbols-outlined">videocam_off</span>
+                    <p>Nenhum post ainda</p>
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="profile-title-section">
-                <h2 className="profile-name">
-                  {profileData?.username || profileData?.fullName || 'Usuário'}
-                </h2>
-                {profileData?.userHandle && (
-                  <p className="profile-handle">@{profileData.userHandle}</p>
-                )}
-                {profileData?.bio && (
-                  <p className="profile-bio-text">{profileData.bio}</p>
-                )}
-              </div>
-
-              {/* Estatísticas - Moved inside header for better grouping */}
-              <div className="profile-stats">
-                <div className="stat-item">
-                  <span className="stat-number">{formatNumber(userPosts.length)}</span>
-                  <span className="stat-label">Posts</span>
-                </div>
-                <div className="stat-item" onClick={() => setActiveTab('following')}>
-                  <span className="stat-number">{formatNumber(followingCount)}</span>
-                  <span className="stat-label">Seguindo</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">{formatNumber(followersCount)}</span>
-                  <span className="stat-label">Seguidores</span>
-                </div>
-              </div>
-
-              {/* Botões de Ação */}
-              <div className="profile-actions">
-                {isOwnProfile ? (
-                  <>
-                    <md-filled-tonal-button onClick={handleEditProfile} className="action-btn">
-                      <md-icon slot="icon">edit</md-icon>
-                      Editar Perfil
-                    </md-filled-tonal-button>
-                  </>
+            {/* VIEW: DASH (Text Posts) */}
+            <div id="view-dash" className="profile-view-section">
+              <div className="dash-list-profile" style={{ padding: '0 8px' }}>
+                {postsLoading ? (
+                  <div className="loading-posts">
+                    <span className="material-symbols-outlined spin">progress_activity</span>
+                  </div>
+                ) : dashPosts.length > 0 ? (
+                  dashPosts.map(post => (
+                    <div key={post.id} className="dash-post-card" style={{ marginBottom: 12, border: '1px solid var(--md-sys-color-outline-variant)', borderRadius: 16, padding: 16, background: 'var(--md-sys-color-surface)' }}>
+                      <p style={{ fontSize: 16, margin: '0 0 8px', whiteSpace: 'pre-wrap' }}>{post.text}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.7, fontSize: 12 }}>
+                        <span>{post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleDateString() : 'Agora'}</span>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>favorite</span> {post.likes?.length || 0}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>chat_bubble</span> {post.comments || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 ) : (
-                  <>
-                    <md-filled-button
-                      onClick={handleFollow}
-                      className={`action-btn follow-btn ${isFollowingUser ? 'following' : ''} ${isFriend ? 'friend' : ''}`}
-                    >
-                      <md-icon slot="icon">
-                        {isFriend ? 'group' : isFollowingUser ? 'check' : 'person_add'}
-                      </md-icon>
-                      {isFriend ? 'Amigo' : isFollowingUser ? 'Seguindo' : 'Seguir'}
-                    </md-filled-button>
-                    <md-filled-tonal-button onClick={handleStartChat} className="action-btn">
-                      <md-icon slot="icon">chat</md-icon>
-                      Mensagem
-                    </md-filled-tonal-button>
-                  </>
+                  <div className="empty-state">
+                    <span className="material-symbols-outlined">article</span>
+                    <p>Nenhum post no dash.</p>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="profile-tabs-container">
-              <div className="profile-tabs">
-                <button
-                  className={`profile-tab ${activeTab === 'posts' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('posts')}
-                >
-                  <md-icon>grid_view</md-icon>
-                  Posts
-                </button>
-                {isOwnProfile && (
-                  <button
-                    className={`profile-tab ${activeTab === 'favorites' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('favorites')}
-                  >
-                    <md-icon>bookmark</md-icon>
-                    Favoritos
-                  </button>
-                )}
-                <button
-                  className={`profile-tab ${activeTab === 'following' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('following')}
-                >
-                  <md-icon>people</md-icon>
-                  Seguindo
-                </button>
-              </div>
-            </div>
-
-            {/* Conteúdo das Tabs */}
-            <div className="profile-content">
-              {activeTab === 'posts' && (
+            {/* VIEW: FAVORITES (Own only) */}
+            {isOwnProfile && (
+              <div id="view-favorites" className="profile-view-section">
                 <div className="posts-grid">
                   {postsLoading ? (
                     <div className="loading-posts">
-                      <md-circular-progress indeterminate></md-circular-progress>
-                    </div>
-                  ) : userPosts.length > 0 ? (
-                    userPosts.map((post) => {
-                      const videoData = {
-                        id: post.id,
-                        username: post.username || profileData?.username || 'Usuário',
-                        avatar: post.avatar || profileData?.avatarBase64 || '',
-                        thumbnail: post.thumbnailUrl || post.videoUrl,
-                        videoUrl: post.videoUrl,
-                        description: post.desc || '',
-                        duration: post.duration || '0:00',
-                        timestamp: post.timestamp,
-                        likes: post.likesUsers?.length || 0,
-                        comments: post.comments || 0,
-                        shares: 0,
-                        isLiked: user ? post.likesUsers?.includes(user.uid) : false,
-                        isFavorited: user ? post.favoritesUsers?.includes(user.uid) : false,
-                        likesUsers: post.likesUsers || [],
-                        reelId: post.id,
-                        userId: post.userId || profileData?.uid
-                      }
-                      return (
-                        <VideoThumbnail
-                          key={post.id}
-                          video={videoData}
-                          onClick={() => handleVideoClick(videoData, userPosts)}
-                        />
-                      )
-                    })
-                  ) : (
-                    <div className="empty-state">
-                      <md-icon>video_library</md-icon>
-                      <p>Nenhum post ainda</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'favorites' && isOwnProfile && (
-                <div className="posts-grid">
-                  {postsLoading ? (
-                    <div className="loading-posts">
-                      <md-circular-progress indeterminate></md-circular-progress>
+                      <span className="material-symbols-outlined spin">progress_activity</span>
                     </div>
                   ) : favorites.length > 0 ? (
-                    favorites.map((post) => {
-                      const videoData = {
-                        id: post.id,
-                        username: post.username || 'Usuário',
-                        avatar: post.avatar || '',
-                        thumbnail: post.thumbnailUrl || post.videoUrl,
-                        videoUrl: post.videoUrl,
-                        description: post.desc || '',
-                        duration: post.duration || '0:00',
-                        timestamp: post.timestamp,
-                        likes: post.likesUsers?.length || 0,
-                        comments: post.comments || 0,
-                        shares: 0,
-                        isLiked: user ? post.likesUsers?.includes(user.uid) : false,
-                        isFavorited: true,
-                        likesUsers: post.likesUsers || [],
-                        reelId: post.id,
-                        userId: post.userId
-                      }
+                    favorites.map(post => {
+                      const videoData = { ...post, reelId: post.id, userId: post.userId }
                       return (
-                        <VideoThumbnail
-                          key={post.id}
-                          video={videoData}
-                          onClick={() => handleVideoClick(videoData, favorites)}
-                        />
+                        <div key={post.id} className="profile-post-card" onClick={() => handleVideoClick(videoData, favorites)}>
+                          {post.thumbnailUrl ? (
+                            <img src={post.thumbnailUrl} loading="lazy" alt="" />
+                          ) : (
+                            <video src={post.videoUrl} preload="metadata" />
+                          )}
+                          <div className="profile-video-views">
+                            <span className="material-symbols-outlined">play_arrow</span>
+                            {post.views || 0}
+                          </div>
+                        </div>
                       )
                     })
                   ) : (
                     <div className="empty-state">
-                      <md-icon>bookmark_border</md-icon>
+                      <span className="material-symbols-outlined">bookmark_border</span>
                       <p>Nenhum favorito ainda</p>
                     </div>
                   )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {activeTab === 'following' && (
-                <div className="following-list">
-                  {postsLoading ? (
-                    <div className="loading-posts">
-                      <md-circular-progress indeterminate></md-circular-progress>
+            {/* VIEW: FOLLOWING */}
+            <div id="view-following" className="profile-view-section">
+              <div className="following-list">
+                {followingList.length > 0 ? (
+                  followingList.map(u => (
+                    <div key={u.id} className="user-list-item" onClick={() => navigate(`/u/${u.userHandle}`)}>
+                      <div className="user-list-avatar-container">
+                        {u.avatarBase64 ? (
+                          <Avatar src={u.avatarBase64} size={48} className="user-list-avatar" />
+                        ) : (
+                          <div className="user-list-avatar placeholder"><span className="material-symbols-outlined">person</span></div>
+                        )}
+                      </div>
+                      <div className="user-list-info">
+                        <span className="user-list-name">{u.username}</span>
+                        <span className="user-list-handle">@{u.userHandle}</span>
+                      </div>
                     </div>
-                  ) : (
-                    <p className="coming-soon">Lista de seguindo em breve...</p>
-                  )}
-                </div>
-              )}
+                  ))
+                ) : (
+                  <p className="empty-msg">Não está seguindo ninguém.</p>
+                )}
+              </div>
             </div>
+
+            {/* VIEW: FOLLOWERS */}
+            <div id="view-followers" className="profile-view-section">
+              <div className="following-list">
+                {followersList.length > 0 ? (
+                  followersList.map(u => (
+                    <div key={u.id} className="user-list-item" onClick={() => navigate(`/u/${u.userHandle}`)}>
+                      <div className="user-list-avatar-container">
+                        {u.avatarBase64 ? (
+                          <Avatar src={u.avatarBase64} size={48} className="user-list-avatar" />
+                        ) : (
+                          <div className="user-list-avatar placeholder"><span className="material-symbols-outlined">person</span></div>
+                        )}
+                      </div>
+                      <div className="user-list-info">
+                        <span className="user-list-name">{u.username}</span>
+                        <span className="user-list-handle">@{u.userHandle}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="empty-msg">Nenhum seguidor ainda.</p>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
     </>
   )
 }
-

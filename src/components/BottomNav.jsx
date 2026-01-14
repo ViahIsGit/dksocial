@@ -5,7 +5,7 @@ import { useRef } from 'react'
 import '@material/web/icon/icon.js'
 import '@material/web/fab/fab.js'
 
-function BottomNav({ activeTab, onTabChange, onFABClick }) {
+function BottomNav({ activeTab, onTabChange, onFABClick, showFab = true }) {
   const { totalUnreadCount } = useMessages()
 
   const itemRefs = useRef({})
@@ -100,16 +100,18 @@ function BottomNav({ activeTab, onTabChange, onFABClick }) {
       </nav>
 
       {/* FAB */}
-      <md-fab
-        class="bottom-nav-fab"
-        aria-label="Criar"
-        onClick={() => {
-          if (navigator.vibrate) navigator.vibrate(15)
-          onFABClick?.()
-        }}
-      >
-        <md-icon slot="icon">add</md-icon>
-      </md-fab>
+      {showFab && (
+        <md-fab
+          class="bottom-nav-fab"
+          aria-label="Criar"
+          onClick={() => {
+            if (navigator.vibrate) navigator.vibrate(15)
+            onFABClick?.()
+          }}
+        >
+          <md-icon slot="icon">add</md-icon>
+        </md-fab>
+      )}
     </div>
   )
 }

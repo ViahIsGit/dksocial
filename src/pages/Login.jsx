@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import './Login.css'
@@ -20,11 +20,19 @@ function getFriendlyError(code) {
 
 export default function Login({ onShowRegister, onShowForgot }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
+
+  // Pre-fill email from navigation state (e.g. switching accounts)
+  useEffect(() => {
+    if (location.state?.email) {
+      setForm(prev => ({ ...prev, email: location.state.email }))
+    }
+  }, [location.state])
 
   const canSubmit = useMemo(
     () => form.email.trim() !== '' && form.password.trim() !== '' && !loading,
@@ -66,22 +74,22 @@ export default function Login({ onShowRegister, onShowForgot }) {
   return (
     <div className="login-page">
       <section className="login-panel">
-      <header className="login-header">
-  <div className="brand-mark">
-    <div className="brand-copy">
-      <span className="brand-subtitle">Bem-vindo ao DK!</span>
-      <strong className="brand-title">Sua nova experiência social</strong>
-    </div>
-  </div>
+        <header className="login-header">
+          <div className="brand-mark">
+            <div className="brand-copy">
+              <span className="brand-subtitle">Bem-vindo ao DK!</span>
+              <strong className="brand-title">Sua nova experiência social</strong>
+            </div>
+          </div>
 
-  <p className="brand-description">
-  🌎 Explore novos criadores e tendências.<br />
-  🎥 Publique reels e conteúdos dinâmicos.<br />
-  ⚡ Interaja em tempo real, rápido e sem limites.
-</p>
+          <p className="brand-description">
+            🌎 Explore novos criadores e tendências.<br />
+            🎥 Publique reels e conteúdos dinâmicos.<br />
+            ⚡ Interaja em tempo real, rápido e sem limites.
+          </p>
 
 
-</header>
+        </header>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label className="form-label">Email de acesso</label>
