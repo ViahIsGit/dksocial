@@ -85,7 +85,7 @@ export default function StripePayment() {
         if (paymentsClient === null) {
             // 'TEST' environment is required for localhost and unverified merchants.
             // OR_BIBED_11 error occurs if using 'PRODUCTION' without a valid, approved Merchant ID.
-            paymentsClient = new google.payments.api.PaymentsClient({ environment: 'PRODUCTION' })
+            paymentsClient = new google.payments.api.PaymentsClient({ environment: 'TEST' })
         }
         return paymentsClient
     }
