@@ -11,6 +11,7 @@ function NavigationDrawer({ isOpen, onClose }) {
     { id: 'feed', label: 'Feed', icon: 'dynamic_feed', route: '/feed' },
     { id: 'messages', label: 'Mensagens', icon: 'mail', badge: '5', route: '/messages' },
     { id: 'notifications', label: 'Notificações', icon: 'notifications', badge: '3' },
+    { id: 'yoky', label: 'Yoky AI', icon: 'smart_toy', route: '/yoky' },
     { id: 'friends', label: 'Amigos', icon: 'group' },
     { id: 'profile', label: 'Perfil', icon: 'person', route: '/u' },
     { id: 'settings', label: 'Configurações', icon: 'settings' }
@@ -30,9 +31,9 @@ function NavigationDrawer({ isOpen, onClose }) {
   return (
     <>
       {isOpen && (
-        <div 
-          className={`drawer-backdrop ${isOpen ? 'visible' : ''}`} 
-          onClick={onClose} 
+        <div
+          className={`drawer-backdrop ${isOpen ? 'visible' : ''}`}
+          onClick={onClose}
         />
       )}
       <nav className={`navigation-drawer ${isOpen ? 'open' : ''}`}>

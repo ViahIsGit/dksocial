@@ -702,7 +702,6 @@ function Messages() {
               <md-icon-button
                 type="submit"
                 aria-label="Enviar"
-                disabled={!messageText.trim() || sending}
               >
                 <md-icon>send</md-icon>
               </md-icon-button>

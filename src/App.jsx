@@ -21,11 +21,15 @@ import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import PostSignup from './pages/PostSignup'
 import Download from './pages/Download'
+import FAQ from './pages/FAQ'
+import Terms from './pages/Terms'
 
 import Profile from './components/Profile'
 import EditProfile from './components/EditProfile'
 import SettingsPage from './components/SettingsPage'
-import CreateModal from './components/CreateModal'
+import CreatePostModal from './components/CreatePostModal'
+import YokyChat from './pages/YokyChat'
+import Pay from './pages/Pay'
 
 import { auth, db, doc, getDoc, onAuthStateChanged } from './firebase/config'
 
@@ -59,7 +63,8 @@ function AppShell({ profileData }) {
       feed: '/feed',
       messages: '/messages',
       camera: '/camera',
-      notifications: '/notifications'
+      notifications: '/notifications',
+      yoky: '/yoky'
     }
 
     if (routes[tabId]) navigate(routes[tabId])
@@ -72,6 +77,7 @@ function AppShell({ profileData }) {
     if (path === '/feed' || path === '/dash') return 'feed'
     if (path === '/messages') return 'messages'
     if (path === '/camera') return 'camera'
+    if (path === '/yoky') return 'yoky'
     if (path.startsWith('/u')) return 'profile'
     return 'feed'
   }
@@ -89,6 +95,8 @@ function AppShell({ profileData }) {
           <Route path="/messages" element={<Messages />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/music/:id" element={<MusicPage />} />
+          <Route path="/yoky" element={<YokyChat profileData={profileData} />} />
+          <Route path="/pay" element={<Pay />} />
 
           {/* 👇 PERFIL POR HANDLE */}
           <Route
@@ -104,14 +112,16 @@ function AppShell({ profileData }) {
           {/* 👇 EDITAR PERFIL (fixo) */}
           <Route path="/u/edit" element={<EditProfile />} />
 
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings" element={<SettingsPage profileData={profileData} />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/terms" element={<Terms />} />
 
           {/* ⚠️ SEMPRE POR ÚLTIMO */}
           <Route path="*" element={<Navigate to="/feed" replace />} />
         </Routes>
       </div>
 
-      <CreateModal
+      <CreatePostModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         currentUser={auth.currentUser}

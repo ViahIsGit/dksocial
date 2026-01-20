@@ -62,8 +62,6 @@ export default function DashFeed({ feedVersion }) {
         }
     }
 
-
-
     const handleComment = (e, post) => {
         e.stopPropagation()
         setSelectedPostId(post.id)
@@ -72,7 +70,6 @@ export default function DashFeed({ feedVersion }) {
 
     const handleRepost = (e, post) => {
         e.stopPropagation()
-        // Placeholder for repost logic
         alert('Repost functionality coming soon!')
     }
 
@@ -99,7 +96,6 @@ export default function DashFeed({ feedVersion }) {
             await updateDoc(ref, { likes: arrayRemove(currentUser.uid) })
         } else {
             await updateDoc(ref, { likes: arrayUnion(currentUser.uid) })
-            // Send notification if not own post
             if (post.userId !== currentUser.uid) {
                 addDoc(collection(db, 'notifications'), {
                     recipientId: post.userId,
@@ -111,7 +107,27 @@ export default function DashFeed({ feedVersion }) {
                 })
             }
         }
-        loadPosts() // Refresh UI (optimistic update would be better but this is safer)
+        loadPosts()
+    }
+
+    const handleVote = async (e, post, optionId) => {
+        e.stopPropagation()
+        if (!currentUser) return
+
+        const alreadyVoted = post.pollOptions.some(opt => opt.votes.includes(currentUser.uid))
+        if (alreadyVoted) return;
+
+        const updatedOptions = post.pollOptions.map(opt => {
+            if (opt.id === optionId) {
+                return { ...opt, votes: [...opt.votes, currentUser.uid] }
+            }
+            return opt
+        })
+
+        setPosts(prev => prev.map(p => p.id === post.id ? { ...p, pollOptions: updatedOptions } : p))
+
+        const ref = doc(db, 'posts', post.id)
+        await updateDoc(ref, { pollOptions: updatedOptions })
     }
 
     return (
@@ -138,6 +154,12 @@ export default function DashFeed({ feedVersion }) {
                                             <span className="post-time">
                                                 {post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
                                             </span>
+                                            {post.location && (
+                                                <span className="post-location-chip">
+                                                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
+                                                    {post.location.name}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -149,6 +171,62 @@ export default function DashFeed({ feedVersion }) {
                             <div className="post-body">
                                 {post.text}
                             </div>
+
+                            {post.mediaUrl && (
+                                <div className="post-media-container" style={{ borderRadius: 16, overflow: 'hidden', marginTop: 12, marginBottom: 12, border: '1px solid var(--md-sys-color-outline-variant)' }}>
+                                    {post.mediaType === 'video' ? (
+                                        <video src={post.mediaUrl} controls style={{ width: '100%', display: 'block' }} />
+                                    ) : (
+                                        <img src={post.mediaUrl} alt="post media" style={{ width: '100%', display: 'block' }} />
+                                    )}
+                                </div>
+                            )}
+
+                            {post.type === 'poll' && (
+                                <div className="poll-display" style={{ marginTop: 12, marginBottom: 12 }}>
+                                    {post.pollOptions.map(opt => {
+                                        const totalVotes = post.pollOptions.reduce((acc, curr) => acc + curr.votes.length, 0)
+                                        const percentage = totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0
+                                        const hasVoted = post.pollOptions.some(o => o.votes.includes(currentUser?.uid))
+                                        const isSelected = opt.votes.includes(currentUser?.uid)
+
+                                        return (
+                                            <div
+                                                key={opt.id}
+                                                className={`poll-option ${hasVoted ? 'voted' : ''} ${isSelected ? 'selected' : ''}`}
+                                                onClick={(e) => !hasVoted && handleVote(e, post, opt.id)}
+                                                style={{
+                                                    position: 'relative',
+                                                    padding: '10px 14px',
+                                                    marginBottom: 8,
+                                                    borderRadius: 12,
+                                                    background: 'var(--md-sys-color-surface-variant)',
+                                                    cursor: hasVoted ? 'default' : 'pointer',
+                                                    overflow: 'hidden'
+                                                }}
+                                            >
+                                                <div
+                                                    className="poll-progress"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: 0, top: 0, bottom: 0,
+                                                        width: `${percentage}%`,
+                                                        background: 'rgba(var(--md-sys-color-primary-rgb), 0.15)',
+                                                        zIndex: 0
+                                                    }}
+                                                />
+                                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', fontWeight: 500 }}>
+                                                    <span>{opt.text}</span>
+                                                    <span>{percentage}%</span>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                    <div style={{ fontSize: 12, color: 'var(--md-sys-color-outline)' }}>
+                                        {post.pollOptions.reduce((acc, curr) => acc + curr.votes.length, 0)} votes
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="post-footer">
                                 <button className="action-btn-small" onClick={(e) => handleComment(e, post)}>

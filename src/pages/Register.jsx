@@ -2,32 +2,27 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth, db, doc, serverTimestamp, setDoc } from '../firebase/config'
+import '@material/web/textfield/filled-text-field.js'
+import '@material/web/button/filled-button.js'
+import '@material/web/icon/icon.js'
 import './Register.css'
-
-const benefitTiles = [
-  { id: 'metrics', icon: 'insights', label: 'Analytics em tempo real' },
-  { id: 'studio', icon: 'palette', label: 'Studio de criação' },
-  { id: 'collab', icon: 'diversity_3', label: 'Squads colaborativos' }
-]
 
 function getFriendlyError(code) {
   const map = {
-    'auth/email-already-in-use': 'Já existe uma conta com esse email.',
-    'auth/invalid-email': 'Formato de email inválido.',
-    'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
-    'auth/operation-not-allowed': 'Cadastro temporariamente indisponível.'
+    'auth/email-already-in-use': 'Email is already taken.',
+    'auth/invalid-email': 'Invalid email format.',
+    'auth/weak-password': 'Password should be at least 6 chars.',
   }
-  return map[code] || 'Não foi possível criar sua conta agora. Tente novamente.'
+  return map[code] || 'Could not create account.'
 }
 
-export default function Register({ onShowLogin, onShowForgot }) {
+export default function Register() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
-    confirm: '',
-    code: ''
+    confirm: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -45,8 +40,8 @@ export default function Register({ onShowLogin, onShowForgot }) {
   }, [form, loading, passwordsMatch])
 
   const handleChange = (field) => (event) => {
-    const value = event.target.value
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => ({ ...prev, [field]: event.target.value }))
+    setError('')
   }
 
   const handleSubmit = async (event) => {
@@ -67,12 +62,12 @@ export default function Register({ onShowLogin, onShowForgot }) {
           uid: user.uid,
           fullName: form.name.trim(),
           email: form.email.trim(),
-          inviteCode: form.code || null,
           profileSetupCompleted: false,
           createdAt: serverTimestamp()
         },
         { merge: true }
       )
+      navigate('/feed')
     } catch (authError) {
       setError(getFriendlyError(authError.code))
     } finally {
@@ -82,123 +77,69 @@ export default function Register({ onShowLogin, onShowForgot }) {
 
   return (
     <div className="register-page">
-      <div className="register-shell">
-        <section className="register-info">
-          <div className="info-header">
-            <span className="eyebrow">Convite beta</span>
-            <h1>Crie sua conta DK Material</h1>
-            <p>Configure seu perfil creator e libere acesso ao feed experimental.</p>
+      <div className="register-card">
+        <header className="register-header">
+          <div className="register-icon-circle">
+            <md-icon>person_add</md-icon>
           </div>
+          <h1 className="register-title">Create Account</h1>
+          <p className="register-subtitle">Join DKSocial to connect and share.</p>
+        </header>
 
-          <div className="info-grid">
-            {benefitTiles.map((tile) => (
-              <md-elevated-card key={tile.id} className="info-card">
-                <md-icon>{tile.icon}</md-icon>
-                <span>{tile.label}</span>
-              </md-elevated-card>
-            ))}
-          </div>
+        <form className="register-form" onSubmit={handleSubmit}>
+          <md-filled-text-field
+            value={form.name}
+            onInput={handleChange('name')}
+            label="Full Name"
+            required
+          >
+            <md-icon slot="leading-icon">badge</md-icon>
+          </md-filled-text-field>
 
-          <div className="info-footer">
-            <md-icon>shield</md-icon>
-            <p>Todos os cadastros passam por revisão humana para manter a comunidade segura.</p>
-          </div>
-        </section>
+          <md-filled-text-field
+            type="email"
+            value={form.email}
+            onInput={handleChange('email')}
+            label="Email"
+            required
+          >
+            <md-icon slot="leading-icon">mail</md-icon>
+          </md-filled-text-field>
 
-        <section className="register-form-panel">
-          <header className="register-header">
-            <div>
-              <h2>Comece informando seus dados</h2>
-              <p>Usaremos essas informações para personalizar sua experiência.</p>
-            </div>
-            <button type="button" className="ghost-link" onClick={() => navigate('/login')}>
-              Já tenho conta
-            </button>
-          </header>
+          <md-filled-text-field
+            type="password"
+            value={form.password}
+            onInput={handleChange('password')}
+            label="Password"
+            required
+          >
+            <md-icon slot="leading-icon">lock</md-icon>
+          </md-filled-text-field>
 
-          <form className="register-form" onSubmit={handleSubmit}>
-            <div className="field-group">
-              <label className="form-label">Nome completo</label>
-              <md-filled-text-field
-                value={form.name}
-                onInput={handleChange('name')}
-                label="Como deseja ser chamado"
-                required
-              >
-                <md-icon slot="leading-icon">badge</md-icon>
-              </md-filled-text-field>
-            </div>
+          <md-filled-text-field
+            type="password"
+            value={form.confirm}
+            onInput={handleChange('confirm')}
+            label="Confirm Password"
+            required
+            error={!passwordsMatch && form.confirm.trim() !== ''}
+            errorText={!passwordsMatch && form.confirm.trim() !== '' ? "Passwords do not match" : ""}
+          >
+            <md-icon slot="leading-icon">check_circle</md-icon>
+          </md-filled-text-field>
 
-            <div className="field-group">
-              <label className="form-label">Email</label>
-              <md-filled-text-field
-                type="email"
-                value={form.email}
-                onInput={handleChange('email')}
-                label="voce@email.com"
-                required
-              >
-                <md-icon slot="leading-icon">alternate_email</md-icon>
-              </md-filled-text-field>
-            </div>
+          {error && <div className="form-error">{error}</div>}
 
-            <div className="field-row">
-              <div className="field-group">
-                <label className="form-label">Senha</label>
-                <md-filled-text-field
-                  type="password"
-                  value={form.password}
-                  onInput={handleChange('password')}
-                  label="Mínimo 6 caracteres"
-                  required
-                  autoComplete="new-password"
-                >
-                  <md-icon slot="leading-icon">lock</md-icon>
-                </md-filled-text-field>
-              </div>
+          <md-filled-button type="submit">
+            {loading ? 'Creating...' : 'Sign Up'}
+          </md-filled-button>
+        </form>
 
-              <div className="field-group">
-                <label className="form-label">Confirmar senha</label>
-                <md-filled-text-field
-                  type="password"
-                  value={form.confirm}
-                  onInput={handleChange('confirm')}
-                  label="Repita a senha"
-                  required
-                  autoComplete="new-password"
-                  error={!passwordsMatch && form.confirm.trim() !== ''}
-                  errorText="As senhas não coincidem"
-                >
-                  <md-icon slot="leading-icon">check_circle</md-icon>
-                </md-filled-text-field>
-              </div>
-            </div>
-
-            <div className="field-group">
-              <label className="form-label">Código de convite (opcional)</label>
-              <md-filled-text-field
-                value={form.code}
-                onInput={handleChange('code')}
-                label="#CREATOR"
-              >
-                <md-icon slot="leading-icon">key</md-icon>
-              </md-filled-text-field>
-            </div>
-
-            {error && <div className="form-error">{error}</div>}
-
-            <md-filled-button type="submit" >
-              {loading ? 'Criando...' : 'Criar conta'}
-            </md-filled-button>
-
-            <button type="button" className="ghost-link" onClick={() => navigate('/forgot-password')}>
-              Precisa recuperar o acesso?
-            </button>
-          </form>
-        </section>
+        <footer className="register-footer">
+          Already have an account?
+          <button className="login-link" onClick={() => navigate('/login')}>Sign in</button>
+        </footer>
       </div>
     </div>
   )
 }
-
-

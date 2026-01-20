@@ -207,8 +207,21 @@ export default function Profile({ onMenuClick, drawerOpen }) {
   /* =========================
      Posts do usuário
      ========================= */
+  /* =========================
+     Posts do usuário (com verificação de Privacidade)
+     ========================= */
+  const [postsHidden, setPostsHidden] = useState(false);
+
   useEffect(() => {
     if (!profileData?.uid || activeTab !== 'posts') return
+
+    // Privacy Check
+    if (!isOwnProfile && profileData.isPrivate && !isFollowingUser) {
+      setPostsHidden(true);
+      setPostsLoading(false);
+      return;
+    }
+    setPostsHidden(false);
 
     const loadPosts = async () => {
       setPostsLoading(true)
@@ -236,7 +249,8 @@ export default function Profile({ onMenuClick, drawerOpen }) {
     }
 
     loadPosts()
-  }, [profileData, activeTab])
+  }, [profileData, activeTab, isFollowingUser, isOwnProfile])
+
 
   /* =========================
      Favoritos (apenas próprio)
@@ -376,6 +390,27 @@ export default function Profile({ onMenuClick, drawerOpen }) {
               {profileData.bio && (
                 <p className="profile-bio-text">{profileData.bio}</p>
               )}
+
+              {/* SOCIAL LINKS */}
+              {profileData.socialLinks && (
+                <div style={{ display: 'flex', gap: 16, marginTop: 12, justifyContent: 'center' }}>
+                  {profileData.socialLinks.instagram && (
+                    <a href={`https://instagram.com/${profileData.socialLinks.instagram}`} target="_blank" rel="noreferrer" style={{ color: 'var(--md-sys-color-primary)', textDecoration: 'none' }}>
+                      <i className="fa-brands fa-instagram" style={{ fontSize: 24, fontFamily: 'sans-serif', fontWeight: 'bold' }}>IG</i>
+                    </a>
+                  )}
+                  {profileData.socialLinks.twitter && (
+                    <a href={`https://twitter.com/${profileData.socialLinks.twitter}`} target="_blank" rel="noreferrer" style={{ color: 'var(--md-sys-color-primary)', textDecoration: 'none' }}>
+                      <span style={{ fontSize: 16, fontWeight: 'bold' }}>X</span>
+                    </a>
+                  )}
+                  {profileData.socialLinks.facebook && (
+                    <a href={`https://facebook.com/${profileData.socialLinks.facebook}`} target="_blank" rel="noreferrer" style={{ color: 'var(--md-sys-color-primary)', textDecoration: 'none' }}>
+                      <span style={{ fontSize: 16, fontWeight: 'bold' }}>FB</span>
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="profile-actions">
@@ -447,7 +482,6 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                 }}
               >
                 <span className="material-symbols-outlined">grid_view</span>
-                Posts
               </button>
               <button
                 className={`profile-tab ${activeTab === 'dash' ? 'active' : ''}`}
@@ -457,7 +491,6 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                 }}
               >
                 <span className="material-symbols-outlined">article</span>
-                Dash
               </button>
               {isOwnProfile && (
                 <button
@@ -468,7 +501,6 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                   }}
                 >
                   <span className="material-symbols-outlined">bookmark</span>
-                  Salvos
                 </button>
               )}
               <button
@@ -479,7 +511,6 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                 }}
               >
                 <span className="material-symbols-outlined">group</span>
-                Seguindo
               </button>
               <button
                 className={`profile-tab ${activeTab === 'followers' ? 'active' : ''}`}
@@ -489,7 +520,6 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                 }}
               >
                 <span className="material-symbols-outlined">groups</span>
-                Seguidores
               </button>
             </div>
           </div>
@@ -537,6 +567,12 @@ export default function Profile({ onMenuClick, drawerOpen }) {
                       </div>
                     </div>
                   ))
+                ) : postsHidden ? (
+                  <div className="empty-state">
+                    <md-icon style={{ fontSize: 48, marginBottom: 16 }}>lock</md-icon>
+                    <p>Esta conta é privada</p>
+                    <span style={{ fontSize: 12, opacity: 0.7 }}>Siga para ver os posts</span>
+                  </div>
                 ) : (
                   <div className="empty-state">
                     <span className="material-symbols-outlined">videocam_off</span>

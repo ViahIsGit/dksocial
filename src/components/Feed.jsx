@@ -18,6 +18,11 @@ export default function Feed({ initialTab }) {
     const [isPostModalOpen, setIsPostModalOpen] = useState(false)
     const [feedVersion, setFeedVersion] = useState(0)
 
+    // Sync activeTab when initialTab prop changes (fixes Dash loading)
+    useEffect(() => {
+        if (initialTab) setActiveTab(initialTab)
+    }, [initialTab])
+
     // ... videos state
 
     const handleTabSwitch = (tab) => {

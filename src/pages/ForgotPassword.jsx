@@ -2,9 +2,12 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../firebase/config'
+import '@material/web/textfield/filled-text-field.js'
+import '@material/web/button/filled-button.js'
+import '@material/web/icon/icon.js'
 import './ForgotPassword.css'
 
-export default function ForgotPassword({ onShowLogin, onShowRegister }) {
+export default function ForgotPassword() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,7 +27,7 @@ export default function ForgotPassword({ onShowLogin, onShowRegister }) {
       await sendPasswordResetEmail(auth, email)
       setStatus('sent')
     } catch (authError) {
-      setError('Não foi possível enviar o email agora. Verifique o endereço informado.')
+      setError('Could not send reset email. Check address.')
     } finally {
       setLoading(false)
     }
@@ -32,59 +35,50 @@ export default function ForgotPassword({ onShowLogin, onShowRegister }) {
 
   return (
     <div className="recover-page">
-      <div className="recover-card">
+      <div className="recover-container">
         <header className="recover-header">
-          <div className="recover-icon">
+          <div className="recover-icon-circle">
             <md-icon>lock_reset</md-icon>
           </div>
-          <h1>Recupere seu acesso</h1>
-          <p>Enviaremos um email com instruções para redefinir sua senha.</p>
+          <h1 className="recover-title">Reset Password</h1>
+          <p className="recover-subtitle">Enter your email and we'll send you a link to reset your access.</p>
         </header>
 
         <form className="recover-form" onSubmit={handleSubmit}>
-          <label className="form-label">Email cadastrado</label>
-          <md-filled-text-field
-            type="email"
-            value={email}
-            onInput={(event) => setEmail(event.target.value)}
-            label="voce@email.com"
-            required
-          >
-            <md-icon slot="leading-icon">alternate_email</md-icon>
-          </md-filled-text-field>
-
-          {error && <div className="form-error">{error}</div>}
-
-          {status === 'sent' && (
+          {status === 'sent' ? (
             <div className="recover-success">
-              <md-icon>mark_email_read</md-icon>
+              <md-icon>check_circle</md-icon>
               <div>
-                <strong>Verifique sua caixa de entrada</strong>
-                <p>
-                  Caso não encontre o email, revise seu spam ou aguarde alguns minutos antes de tentar
-                  novamente.
-                </p>
+                <strong>Check your email</strong>
+                <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>We sent a link to {email}</div>
               </div>
             </div>
-          )}
+          ) : (
+            <>
+              <md-filled-text-field
+                type="email"
+                value={email}
+                onInput={(e) => setEmail(e.target.value)}
+                label="Registered Email"
+                required
+              >
+                <md-icon slot="leading-icon">email</md-icon>
+              </md-filled-text-field>
 
-          <md-filled-button type="submit">
-            {loading ? 'Enviando...' : 'Enviar link de redefinição'}
-          </md-filled-button>
+              {error && <div className="form-error">{error}</div>}
+
+              <md-filled-button type="submit" >
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </md-filled-button>
+            </>
+          )}
         </form>
 
         <footer className="recover-footer">
-          <button type="button" className="ghost-link" onClick={() => navigate('/login')}>
-            Voltar para login
-          </button>
-          <button type="button" className="ghost-link" onClick={() => navigate('/register')}>
-            Criar nova conta
-          </button>
+          <button className="text-link" onClick={() => navigate('/login')}>Back to Login</button>
+          <button className="text-link" onClick={() => navigate('/register')}>Create Account</button>
         </footer>
       </div>
     </div>
   )
 }
-
-
-

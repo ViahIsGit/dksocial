@@ -4,12 +4,12 @@ import CommentsModal from '../components/CommentsModal'
 import { db, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from '../firebase/config'
 import { getAuth } from 'firebase/auth'
 import './PostDetails.css'
-import 'mdui/components/top-app-bar.js';
-import 'mdui/components/top-app-bar-title.js';
-import 'mdui/components/button-icon.js';
-import 'mdui/components/button.js';
-import 'mdui/components/icon.js';
-import 'mdui/components/circular-progress.js';
+import '@material/web/icon/icon.js'
+import '@material/web/iconbutton/icon-button.js'
+import '@material/web/progress/circular-progress.js'
+import '@material/web/button/filled-button.js'
+
+import Avatar from '../components/Avatar' // Using existing Avatar component if available, else standardimg
 
 export default function PostDetails() {
     const { id } = useParams()
@@ -72,8 +72,8 @@ export default function PostDetails() {
 
     if (loading) {
         return (
-            <div className="post-details-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <mdui-circular-progress></mdui-circular-progress>
+            <div className="post-details-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <md-circular-progress indeterminate></md-circular-progress>
             </div>
         )
     }
@@ -81,12 +81,16 @@ export default function PostDetails() {
     if (!post) {
         return (
             <div className="post-details-container">
-                <mdui-top-app-bar variant="small" scroll-target=".example-variant" class="example-variant-bar">
-                    <md-icon onClick={() => navigate(-1)}>arrow_back</md-icon>
-                    <mdui-top-app-bar-title>Detalhes do Post</mdui-top-app-bar-title>
-                    <div style={{ flexGrow: 1 }}></div>
-                </mdui-top-app-bar>
-                <div style={{ marginTop: 80, padding: 20, textAlign: 'center' }}>Post não encontrado</div>
+                <header className="post-details-header">
+                    <md-icon-button onClick={() => navigate(-1)}>
+                        <md-icon>arrow_back</md-icon>
+                    </md-icon-button>
+                    <h3>Post not found</h3>
+                </header>
+                <div style={{ padding: 40, textAlign: 'center' }}>
+                    <md-icon style={{ fontSize: 48, opacity: 0.5 }}>error_outline</md-icon>
+                    <p>This post may have been deleted.</p>
+                </div>
             </div>
         )
     }
@@ -95,11 +99,12 @@ export default function PostDetails() {
 
     return (
         <div className="post-details-container">
-            <mdui-top-app-bar variant="small" scroll-target=".example-variant" class="example-variant-bar">
-                <md-icon onClick={() => navigate(-1)}>arrow_back</md-icon>
-                <mdui-top-app-bar-title>Detalhes do Post</mdui-top-app-bar-title>
-                <div style={{ flexGrow: 1 }}></div>
-            </mdui-top-app-bar>
+            <header className="post-details-header">
+                <md-icon-button onClick={() => navigate(-1)}>
+                    <md-icon>arrow_back</md-icon>
+                </md-icon-button>
+                <span style={{ fontWeight: 600, fontSize: '1.2rem' }}>Post</span>
+            </header>
 
             <div className="post-details-content">
                 <main className="post-details-main">
@@ -107,11 +112,17 @@ export default function PostDetails() {
                         className="post-details-user"
                         onClick={() => navigate(`/u/${post.user.userHandle || post.userId}`)}
                     >
-                        {post.user.avatarBase64 ? (
-                            <mdui-avatar src={post.user.avatarBase64} alt={post.user.username}></mdui-avatar>
-                        ) : (
-                            <mdui-avatar icon="person"></mdui-avatar>
-                        )}
+                        {/* Fallback avatar logic inline if specific component not robust */}
+                        <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', background: 'var(--md-sys-color-surface-variant)' }}>
+                            {post.user.avatarBase64 ? (
+                                <img src={post.user.avatarBase64} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <md-icon>person</md-icon>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="post-details-names">
                             <span className="post-details-name">{post.user.username}</span>
                             <span className="post-details-handle">@{post.user.userHandle}</span>
@@ -122,42 +133,125 @@ export default function PostDetails() {
                         {post.text}
                     </div>
 
+                    {post.mediaUrl && (
+                        <div className="post-details-media" style={{ borderRadius: 24, overflow: 'hidden', marginBottom: 24, border: '1px solid var(--md-sys-color-outline-variant)' }}>
+                            {post.mediaType === 'video' ? (
+                                <video src={post.mediaUrl} controls style={{ width: '100%', display: 'block', maxHeight: '500px' }} />
+                            ) : (
+                                <img src={post.mediaUrl} alt="post media" style={{ width: '100%', display: 'block' }} />
+                            )}
+                        </div>
+                    )}
+
+                    {post.type === 'poll' && (
+                        <div className="poll-display" style={{ marginTop: 12, marginBottom: 24, width: '100%' }}>
+                            {post.pollOptions.map(opt => {
+                                const totalVotes = post.pollOptions.reduce((acc, curr) => acc + curr.votes.length, 0)
+                                const percentage = totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0
+                                const hasVoted = post.pollOptions.some(o => o.votes.includes(currentUser?.uid))
+                                const isSelected = opt.votes.includes(currentUser?.uid)
+
+                                return (
+                                    <div
+                                        key={opt.id}
+                                        className={`poll-option ${hasVoted ? 'voted' : ''} ${isSelected ? 'selected' : ''}`}
+                                        onClick={async () => {
+                                            if (hasVoted || !currentUser) return
+                                            const updatedOptions = post.pollOptions.map(o => o.id === opt.id ? { ...o, votes: [...o.votes, currentUser.uid] } : o)
+                                            setPost(prev => ({ ...prev, pollOptions: updatedOptions }))
+                                            const ref = doc(db, 'posts', post.id)
+                                            await updateDoc(ref, { pollOptions: updatedOptions })
+                                        }}
+                                        style={{
+                                            position: 'relative',
+                                            padding: '12px 16px',
+                                            marginBottom: 8,
+                                            borderRadius: 12,
+                                            background: 'var(--md-sys-color-surface-variant)',
+                                            cursor: hasVoted ? 'default' : 'pointer',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        <div
+                                            className="poll-progress"
+                                            style={{
+                                                position: 'absolute',
+                                                left: 0, top: 0, bottom: 0,
+                                                width: `${percentage}%`,
+                                                background: 'rgba(var(--md-sys-color-primary-rgb), 0.15)',
+                                                zIndex: 0
+                                            }}
+                                        />
+                                        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', fontWeight: 500 }}>
+                                            <span>{opt.text}</span>
+                                            <span>{percentage}%</span>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                            <div style={{ fontSize: 12, color: 'var(--md-sys-color-outline)' }}>
+                                {post.pollOptions.reduce((acc, curr) => acc + curr.votes.length, 0)} votes
+                            </div>
+                        </div>
+                    )}
+
                     <div className="post-details-meta">
-                        {post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleString() : ''}
+                        {post.createdAt ? new Date(post.createdAt.toMillis()).toLocaleString(undefined, {
+                            hour: 'numeric', minute: 'numeric',
+                            day: 'numeric', month: 'short', year: 'numeric'
+                        }) : ''}
+                        {post.location && (
+                            <span style={{ marginLeft: 12, display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--md-sys-color-primary)', background: 'rgba(var(--md-sys-color-primary-rgb), 0.08)', padding: '2px 8px', borderRadius: 6, fontSize: '0.9rem' }}>
+                                <md-icon style={{ fontSize: 16 }}>location_on</md-icon>
+                                {post.location.name}
+                            </span>
+                        )}
                     </div>
 
                     <div className="post-details-stats">
-                        <span className="post-stat"><strong>{Array.isArray(post.likes) ? post.likes.length : 0}</strong><md-icon>favorite</md-icon></span>
-                        <span className="post-stat"><strong>{post.comments || 0}</strong><md-icon>chat_bubble_outline</md-icon></span>
+                        <span className="post-stat">
+                            <strong>{Array.isArray(post.likes) ? post.likes.length : 0}</strong> Likes
+                        </span>
+                        <span className="post-stat">
+                            <strong>{post.comments || 0}</strong> Comments
+                        </span>
                     </div>
 
                     <div className="post-details-actions">
-                        <div className="comment-count-group">
-                            <md-icon onClick={() => setIsCommentsOpen(true)}>chat_bubble_outline</md-icon>
-                            <span>{post.comments || 0}</span>
-                        </div>
+                        <button className="action-btn" onClick={() => setIsCommentsOpen(true)}>
+                            <md-icon>chat_bubble_outline</md-icon>
+                        </button>
 
-                        <md-icon onClick={handleRepost}>repeat</md-icon>
+                        <button className="action-btn" onClick={handleRepost}>
+                            <md-icon>repeat</md-icon>
+                        </button>
 
-                        <md-icon
-                            style={{ color: isLiked ? 'var(--mdui-color-error)' : 'inherit' }}
+                        <button
+                            className={`action-btn ${isLiked ? 'liked' : ''}`}
                             onClick={handleLike}
-                        >{isLiked ? "favorite" : "favorite_border"}</md-icon>
+                        >
+                            <md-icon>{isLiked ? "favorite" : "favorite_border"}</md-icon>
+                        </button>
 
-                        <md-icon onClick={() => {
+                        <button className="action-btn" onClick={() => {
                             if (navigator.share) {
                                 navigator.share({
-                                    title: `Post de ${post.user.username}`,
+                                    title: `Post by ${post.user.username}`,
                                     text: post.text,
                                     url: window.location.href
                                 })
                             }
-                        }}>ios_share</md-icon>
+                        }}>
+                            <md-icon>ios_share</md-icon>
+                        </button>
                     </div>
                 </main>
 
                 <div className="post-comments-section">
-                    <mdui-button full-width onClick={() => setIsCommentsOpen(true)}>Ver comentários</mdui-button>
+                    {/* Using md-filled-button as a clear call to action */}
+                    <md-filled-button style={{ width: '100%' }} onClick={() => setIsCommentsOpen(true)}>
+                        View Comments
+                    </md-filled-button>
                 </div>
             </div>
 

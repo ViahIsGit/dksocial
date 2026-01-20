@@ -63,7 +63,8 @@
 }
 
 /* Corrigir fonte dos ícones do Material Symbols quando há font-family global */
-md-icon, .material-symbols-outlined {
+md-icon,
+.material-symbols-outlined {
   font-family: 'Material Symbols Outlined' !important;
   font-weight: normal;
   font-style: normal;
@@ -105,4 +106,3 @@ body {
   background: var(--md-sys-color-background);
   overflow: hidden;
 }
-

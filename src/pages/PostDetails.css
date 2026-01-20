@@ -1,24 +1,46 @@
+/* Post Details - Material 3 Expressive */
+
 .post-details-container {
     width: 100%;
     min-height: 100vh;
-    background-color: var(--mdui-color-surface);
-    color: var(--mdui-color-on-surface);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    flex-direction: column;
+}
+
+.post-details-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    background: rgba(var(--md-sys-color-surface-rgb), 0.8);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .post-details-content {
-    margin-top: 64px;
-    /* Space for top-app-bar */
-    padding: 16px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    /* Centered content column */
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
 }
 
+.post-details-main {
+    padding: 24px 20px;
+    background-color: var(--md-sys-color-surface);
+}
+
+/* User Info */
 .post-details-user {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 14px;
+    margin-bottom: 20px;
     cursor: pointer;
 }
 
@@ -28,55 +50,111 @@
 }
 
 .post-details-name {
-    font-weight: bold;
-    font-size: 1rem;
-    color: var(--mdui-color-on-surface);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--md-sys-color-on-surface);
 }
 
 .post-details-handle {
-    color: var(--mdui-color-on-surface-variant);
-    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.95rem;
 }
 
+/* Post Body */
 .post-details-text {
-    font-size: 1.2rem;
-    line-height: 1.5;
-    margin-bottom: 16px;
-    color: var(--mdui-color-on-surface);
+    font-size: 1.5rem;
+    /* Larger expressive type */
+    line-height: 1.4;
+    margin-bottom: 24px;
+    color: var(--md-sys-color-on-surface);
     word-wrap: break-word;
+    font-weight: 400;
 }
 
+/* Meta & Stats */
 .post-details-meta {
-    color: var(--mdui-color-on-surface-variant);
-    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.9rem;
     margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .post-details-stats {
     display: flex;
-    gap: 16px;
+    gap: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--mdui-color-outline-variant);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
     margin-bottom: 16px;
 }
 
 .post-stat {
-    color: var(--mdui-color-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.95rem;
 }
 
+.post-stat md-icon {
+    font-size: 1.2rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Actions */
 .post-details-actions {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    /* distribute evenly */
     align-items: center;
+    padding: 0 12px;
 }
 
-.comment-count-group {
+.action-btn {
+    background: transparent;
+    border: none;
+    padding: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 4px;
-    color: var(--mdui-color-on-surface-variant);
+    justify-content: center;
 }
 
+.action-btn:hover {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+}
+
+.action-btn md-icon {
+    font-size: 28px;
+    /* Larger icons */
+}
+
+.action-btn.liked {
+    color: #fa5a5a;
+    /* Custom love color or use generic error */
+}
+
+/* Comments Section */
 .post-comments-section {
-    margin-top: 20px;
+    padding: 0 20px 40px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (min-width: 680px) {
+    .post-details-container {
+        /* Subtle centering on desktop */
+        background-color: var(--md-sys-color-surface-container-low);
+    }
+
+    .post-details-content {
+        background-color: var(--md-sys-color-surface);
+        min-height: 100vh;
+        border-left: 1px solid var(--md-sys-color-outline-variant);
+        border-right: 1px solid var(--md-sys-color-outline-variant);
+    }
 }

@@ -1,22 +1,26 @@
+/* ===============================
+   USER SEARCH MODAL (Material 3 Expressive)
+   =============================== */
+
 .user-search-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--md-sys-color-scrim);
+  inset: 0;
+  background: var(--md-sys-color-scrim, rgba(0, 0, 0, 0.32));
   z-index: 1000;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  /* Center vertically on desktop */
   justify-content: center;
-  padding: 0;
-  animation: fadeIn 0.2s ease-out;
+  padding: 24px;
+  animation: fadeIn 0.2s cubic-bezier(0.2, 0, 0, 1);
+  backdrop-filter: blur(4px);
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -24,135 +28,131 @@
 
 .user-search-container {
   width: 100%;
-  height: 100%;
-  background: var(--md-sys-color-surface);
+  max-width: 560px;
+  /* Dialog width */
+  max-height: 85vh;
+  /* Keep some space */
+  background: var(--md-sys-color-surface-container);
+  border-radius: 28px;
+  /* Extra Large rounded */
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.3s ease-out;
   overflow: hidden;
+  box-shadow: var(--md-sys-elevation-3);
+  animation: scaleIn 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
-@keyframes slideUp {
+@keyframes scaleIn {
   from {
-    transform: translateY(20px);
     opacity: 0;
+    transform: scale(0.95) translateY(10px);
   }
+
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
+/* Header */
 .user-search-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container);
-  min-height: 64px;
+  padding: 16px 24px;
+  background: transparent;
+  flex-shrink: 0;
 }
 
 .user-search-header h2 {
-  font-size: 1.25rem;
+  font-size: 22px;
   font-weight: 500;
+  /* Regular weight for headlines */
   color: var(--md-sys-color-on-surface);
   margin: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--md-sys-typescale-headline-small-font);
 }
 
+/* Content */
 .user-search-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 0 24px 24px;
   overflow: hidden;
-  padding: 16px;
 }
 
+/* Search Input */
 .user-search-input-wrapper {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .user-search-input-wrapper .search-icon {
   position: absolute;
-  left: 16px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--md-sys-color-on-surface-variant);
   pointer-events: none;
   z-index: 1;
-  font-size: 24px;
 }
 
 .user-search-input {
   width: 100%;
   height: 56px;
-  padding: 16px 16px 16px 56px;
-  border: 1px solid var(--md-sys-color-outline);
+  padding: 0 20px 0 52px;
+  border: none;
   border-radius: 28px;
-  background: var(--md-sys-color-surface-container-highest);
+  /* Full pill */
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
-  font-size: 1rem;
-  font-family: 'Google Sans', sans-serif;
+  font-size: 16px;
+  font-family: inherit;
   outline: none;
-  transition: all 0.2s;
+  transition: box-shadow 0.2s;
 }
 
 .user-search-input:focus {
-  border-color: var(--md-sys-color-primary);
-  background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container-highest);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
 }
 
 .user-search-input-wrapper .search-clear {
   position: absolute;
-  right: 8px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
+/* Results */
 .user-search-results {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  /* Scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
 }
 
-.user-search-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--md-sys-color-on-surface-variant);
+.user-search-results::-webkit-scrollbar {
+  width: 6px;
 }
 
-.user-search-loading p {
-  margin-top: 16px;
-  font-size: 0.875rem;
+.user-search-results::-webkit-scrollbar-thumb {
+  background-color: var(--md-sys-color-outline-variant);
+  border-radius: 3px;
 }
 
-.user-search-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--md-sys-color-on-surface-variant);
-  min-height: 300px;
-}
-
-.user-search-empty p {
-  font-size: 0.9375rem;
-  margin: 0;
-}
-
+/* List Items */
 .user-search-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+  /* Tighter list */
 }
 
 .user-search-item {
@@ -162,12 +162,13 @@
   padding: 12px 16px;
   border: none;
   background: transparent;
-  border-radius: 12px;
+  border-radius: 16px;
+  /* Medium rounded items */
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: background-color 0.2s;
-  font-family: 'Google Sans', sans-serif;
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+  color: var(--md-sys-color-on-surface);
 }
 
 .user-search-item:hover {
@@ -175,15 +176,16 @@
 }
 
 .user-search-item:active {
-  background: var(--md-sys-color-surface-container-highest);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 .user-search-avatar {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--md-sys-color-surface-container-high);
+  background: var(--md-sys-color-surface-variant);
   flex-shrink: 0;
 }
 
@@ -200,45 +202,93 @@
 
 .user-search-name {
   font-weight: 500;
-  font-size: 1rem;
-  color: var(--md-sys-color-on-surface);
-  margin-bottom: 4px;
+  font-size: 16px;
+  color: inherit;
+  /* Inherit for active state contrast */
+  margin-bottom: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .user-search-bio {
-  font-size: 0.875rem;
+  font-size: 14px;
   color: var(--md-sys-color-on-surface-variant);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  opacity: 0.8;
+}
+
+.user-search-item:active .user-search-bio {
+  color: var(--md-sys-color-on-secondary-container);
+  opacity: 0.7;
 }
 
 .user-search-arrow {
   color: var(--md-sys-color-primary);
-  flex-shrink: 0;
+  opacity: 0;
+  /* Hidden by default for cleaner look, only show on hover/focus if needed? Or keep visible? */
+  transform: translateX(-8px);
+  transition: all 0.2s ease;
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
-  .user-search-content {
-    padding: 12px;
+.user-search-item:hover .user-search-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.user-search-arrow {
+  display: none;
+  /* Actually simplify interface by removing arrow usually */
+}
+
+
+/* States */
+.user-search-loading,
+.user-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.user-search-empty md-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: var(--md-sys-color-outline);
+}
+
+
+/* Mobile Optimization */
+@media (max-width: 600px) {
+  .user-search-overlay {
+    align-items: flex-end;
+    /* Bottom sheet on mobile? Or fullscreen */
+    padding: 0;
+  }
+
+  .user-search-container {
+    max-width: 100%;
+    height: 100%;
+    /* Fullscreen on mobile */
+    max-height: 100%;
+    border-radius: 0;
   }
 
   .user-search-header {
     padding: 12px 16px;
   }
 
+  .user-search-content {
+    padding: 0 16px 16px;
+  }
+
   .user-search-item {
     padding: 12px;
-    gap: 12px;
-  }
-
-  .user-search-avatar {
-    width: 48px;
-    height: 48px;
+    /* Touch friendly */
   }
 }
-

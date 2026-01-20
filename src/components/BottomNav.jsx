@@ -29,6 +29,7 @@ function BottomNav({ activeTab, onTabChange, onFABClick, showFab = true }) {
       icon: 'notifications',
       badge: '3'
     },
+    { id: 'yoky', label: 'Yoky AI', icon: 'smart_toy' },
     { id: 'profile', label: 'Perfil', icon: 'person' }
   ]
 
