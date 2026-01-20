@@ -11,18 +11,27 @@ export default async function handler(req, res) {
     try {
         const { paymentMethodId, currency = 'brl', price = 100 } = req.body
 
-        // Create a PaymentIntent with the order amount and currency
-        const paymentIntent = await stripe.paymentIntents.create({
+        // Prepare payment intent parameters
+        const params = {
             amount: price,
             currency: currency,
-            payment_method: paymentMethodId,
             confirm: true,
             automatic_payment_methods: {
                 enabled: true,
-                allow_redirects: 'never' // Depending on flow, you might want this
-            },
-            // return_url: 'https://any.com' // Required if redirects are allowed
-        })
+                allow_redirects: 'never'
+            }
+        }
+
+        if (paymentMethodId && paymentMethodId.startsWith('tok_')) {
+            params.payment_method_data = {
+                type: 'card',
+                token: paymentMethodId
+            }
+        } else {
+            params.payment_method = paymentMethodId
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create(params)
 
         // If successful, return the success status
         res.status(200).json({ success: true, paymentIntent })
