@@ -1,5 +1,5 @@
 /* ===============================
-   PROFILE PAGE (Material You)
+   PROFILE PAGE STRUCTURE
    =============================== */
 
 .profile-page {
@@ -14,26 +14,264 @@
 }
 
 /* ===============================
-   LOADING
-   =============================== */
-
-.profile-loading {
-  display: grid;
-  place-items: center;
-  flex: 1;
-  min-height: 50vh;
-}
-
-/* ===============================
    COVER & HEADER
    =============================== */
 
 .profile-cover {
   width: 100%;
-  height: 280px;
+  height: 220px;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-high);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.profile-cover-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+      var(--md-sys-color-primary),
+      var(--md-sys-color-tertiary-container));
+  opacity: 0.8;
+}
+
+.profile-content-wrapper {
+  z-index: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-top: 160px;
+  padding-bottom: 2rem;
+  padding-inline: 16px;
+
+  /* ALINHAMENTO À ESQUERDA GLOBAL */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-header-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+/* ===============================
+   LAYOUT: AVATAR + INFO (LADO A LADO)
+   =============================== */
+
+.profile-header-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end; /* Alinha a base do avatar com a base dos stats */
+  gap: 20px;
+  width: 100%;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+/* Avatar */
+.profile-avatar-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%; /* Remova se quiser quadrado */
+  border: 4px solid var(--md-sys-color-background);
+  background: var(--md-sys-color-background);
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: var(--md-sys-elevation-1);
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Coluna da Direita (Nome + Stats) */
+.profile-info-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  padding-bottom: 4px;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--md-sys-color-on-background);
+}
+
+.profile-handle {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 8px;
+}
+
+/* Bio */
+.profile-bio-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+  max-width: 500px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+/* ===============================
+   STATS (Ao lado da PFP)
+   =============================== */
+
+.profile-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 4px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinhado à esquerda */
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.stat-item:hover {
+  opacity: 0.7;
+}
+
+.stat-number {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ===============================
+   ACTIONS
+   =============================== */
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* ===============================
+   TABS (Estilo "Pills" / Pílulas)
+   =============================== */
+
+.profile-tabs-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Centralizado como no original */
+  margin-bottom: 2rem;
+  background: transparent;
+  border: none;
+  position: static;
+  overflow-x: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  scrollbar-width: none;
+}
+
+.profile-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  background: color-mix(in srgb,
+      var(--md-sys-color-surface-container-high) 75%,
+      transparent);
+  border-radius: 999px;
+  box-shadow: var(--md-sys-elevation-2);
+  backdrop-filter: blur(18px);
+}
+
+.profile-tab {
+  flex: initial;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.profile-tab span {
+  font-size: 18px; /* Tamanho do ícone */
+}
+
+.profile-tab.active {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-weight: 600;
+}
+
+/* Remove a linha de baixo do estilo anterior se existir */
+.profile-tab.active::after {
+  content: none;
+}
+
+.profile-tab:hover {
+  background-color: rgba(var(--md-sys-color-on-surface-variant-rgb), 0.08);
+}
+
+.profile-tab:active {
+  transform: scale(0.96);
+}
+
+/* ===============================
+   RESPONSIVIDADE (Desktop)
+   =============================== */
+
+@media (min-width: 768px) {
+  .profile-avatar-container {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .profile-content-wrapper {
+    padding-top: 140px;
+  }
+
+  .profile-name {
+    font-size: 32px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+}
+
+
   z-index: 0;
   overflow: hidden;
   background: var(--md-sys-color-surface-container-high);
@@ -485,4 +723,5 @@
   text-align: center;
   padding: 30px;
   opacity: 0.6;
+
 }
