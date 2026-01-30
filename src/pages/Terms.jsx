@@ -45,6 +45,18 @@ export default function Terms() {
                         We want DKSocial to be a safe place. Bullying, harassment, hate speech, and illegal content are strictly prohibited and will result in account termination.
                     </p>
                 </section>
+
+                {/* Nova seção adicionada para conformidade com CSAE */}
+                <section style={{ marginBottom: '2rem' }}>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>5. Child Safety & Zero Tolerance</h2>
+                    <p style={{ lineHeight: 1.6, opacity: 0.9 }}>
+                        DKSocial has a zero-tolerance policy against Child Sexual Abuse and Exploitation (CSAE). 
+                        <br /><br />
+                        It is strictly prohibited to publish, share, or solicit any content that depicts the sexual exploitation of minors. 
+                        Any content identified as CSAE will be removed immediately without prior notice. The accounts responsible will be permanently banned, 
+                        and we will report the content and user details to appropriate law enforcement agencies and the National Center for Missing & Exploited Children (NCMEC).
+                    </p>
+                </section>
             </div>
         </div>
     );
